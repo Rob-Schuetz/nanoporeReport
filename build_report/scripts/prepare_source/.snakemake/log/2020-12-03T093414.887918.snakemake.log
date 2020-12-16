@@ -1,0 +1,3 @@
+ModuleNotFoundError in line 4 of C:\Users\RSchuetz\Projects\nanaporeReport\scripts\prepare_source\Snakefile:
+No module named 'scripts.genomics'
+  File "C:\Users\RSchuetz\Projects\nanaporeReport\scripts\prepare_source\Snakefile", line 4, in <module>

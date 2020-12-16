@@ -1,0 +1,4 @@
+/home/ubuntu/projects/nanoporereport_ui/nanoporeReport/build_report/scripts
+Unable to send the following request: http://localhost:8080/jasperserver/rest_v2/login
+Unable to send the following request: http://localhost:8080/jasperserver/rest_v2/serverInfo
+Unable to send the following request: http://localhost:8080/jasperserver/rest_v2/reports/reports/nanoporeReport_5.pdf

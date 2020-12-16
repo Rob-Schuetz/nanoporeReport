@@ -1,0 +1,13 @@
+/home/ubuntu/projects/nanoporereport_ui/nanoporeReport/build_report/scripts
+Making /home/ubuntu/projects/nanoporereport_ui/nanoporeReport/build_report/results:
+complete
+
+Making /home/ubuntu/projects/nanoporereport_ui/nanoporeReport/build_report/results/filtered_vcfs:
+complete
+
+Making /home/ubuntu/projects/nanoporereport_ui/nanoporeReport/build_report/results/annotated_vcfs:
+complete
+
+Making /home/ubuntu/projects/nanoporereport_ui/nanoporeReport/build_report/results/final_source:
+complete
+

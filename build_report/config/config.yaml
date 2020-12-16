@@ -1,0 +1,31 @@
+nanoporeReport:
+  output_root: results
+  input_root: input
+  build: hg19  #hg38
+  annovar_script: /home/ubuntu/projects/nanoporereport_ui/nanoporeReport/build_report/annovar/table_annovar.pl
+  human_db: /home/ubuntu/projects/nanoporereport_ui/nanoporeReport/build_report/annovar/humandb/
+  dp_threshold: 500
+
+jasperserver:
+  hostname: localhost
+  port: 8080
+  username: jasperadmin
+  password: jasperadmin
+  report_path: reports/reports/nanoporeReport_5.pdf
+
+flaskAPI:
+  hostname: localhost
+  port: 5000
+  allowFrom: 0.0.0.0
+  sub_command: /home/ubuntu/projects/nanoporereport_ui/nanoporeReport/build_report/scripts/snake.sh
+  log_dir: /home/ubuntu/projects/nanoporereport_ui/nanoporeReport/api/logs
+
+database:
+  hostname: localhost
+  port: 5432
+  db: nanopore
+  username: postgres
+  password: postgres
+  all_pass_table: report.all_pass
+  target_table: report.targets
+  vcf_table: report.results
