@@ -6,7 +6,10 @@
     "@testing-library/jest-dom": "^5.11.6",
     "@testing-library/react": "^11.2.2",
     "@testing-library/user-event": "^12.5.0",
+    "bootstrap": "^4.5.3",
+    "bs-custom-file-input": "^1.3.4",
     "react": "^17.0.1",
+    "react-bootstrap": "^1.4.0",
     "react-dom": "^17.0.1",
     "react-scripts": "4.0.1",
     "web-vitals": "^0.2.4"
@@ -15,7 +18,10 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "jasper-start": "bash /home/ubuntu/jasperreports-server-cp-7.8.0/ctlscript.sh start",
+    "jasper-stop": "bash /home/ubuntu/jasperreports-server-cp-7.8.0/ctlscript.sh stop",
+    "api-start": "python api/api.py"
   },
   "eslintConfig": {
     "extends": [
@@ -35,5 +41,5 @@
       "last 1 safari version"
     ]
   },
-  "proxy" : "http://localhost:5000"
+  "proxy": "http://localhost:5000"
 }

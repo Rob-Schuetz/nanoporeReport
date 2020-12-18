@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.6.0.final using JasperReports Library version 6.6.0  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="CTO Training Log" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" whenResourceMissingType="Error" uuid="668e914f-136f-4659-92fe-8df348283625">
-	<property name="net.sf.jasperreports.data.adapter" value="NanoporeDB.xml"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Nanopore DB"/>
-	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://localhost:8080/jasperserver/"/>
+<!-- Created with Jaspersoft Studio version 6.16.0.final using JasperReports Library version 6.16.0-48579d909b7943b64690c65c71e07e0b80981928  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Nanopore Sequencing Data Report" pageWidth="555" pageHeight="802" whenNoDataType="BlankPage" columnWidth="555" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" whenResourceMissingType="Empty" uuid="668e914f-136f-4659-92fe-8df348283625">
+	<property name="ireport.jasperserver.url" value="http://34.239.181.15:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
-	<property name="ireport.jasperserver.reportUnit" value="/reports/nanopore/nanoporeReport_2"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/nanoporeReport_notpresent.py"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="AWS NanoporeDB"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/nanoporeReport_notpresent.py_files/main_jrxml"/>
 	<style name="Yellow" mode="Opaque" backcolor="#F9FF8F">
 		<box>
 			<pen lineWidth="0.0"/>
@@ -24,116 +24,53 @@
 	</style>
 	<queryString>
 		<![CDATA[select *
-from report.affected_genes]]>
+from report.nanopore_report;]]>
 	</queryString>
-	<field name="sample" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="sample"/>
+	<field name="id" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="id"/>
+		<property name="com.jaspersoft.studio.field.label" value="id"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="nanopore_report"/>
 	</field>
-	<field name="chrom" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="chrom"/>
-	</field>
-	<field name="pos1" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.label" value="pos1"/>
-	</field>
-	<field name="pos" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.label" value="pos"/>
-	</field>
-	<field name="ref" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="ref"/>
-	</field>
-	<field name="alt" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="alt"/>
-	</field>
-	<field name="vaf" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.label" value="vaf"/>
-	</field>
-	<field name="depth" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.label" value="depth"/>
+	<field name="chrom_num" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="chrom_num"/>
+		<property name="com.jaspersoft.studio.field.label" value="chrom_num"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="nanopore_report"/>
 	</field>
 	<field name="gene_name" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="gene_name"/>
 		<property name="com.jaspersoft.studio.field.label" value="gene_name"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="nanopore_report"/>
 	</field>
 	<field name="gene_func" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="gene_func"/>
 		<property name="com.jaspersoft.studio.field.label" value="gene_func"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="nanopore_report"/>
 	</field>
-	<title>
-		<band height="189" splitType="Stretch">
-			<staticText>
-				<reportElement mode="Transparent" x="0" y="0" width="555" height="40" backcolor="#FFFFFF" uuid="04fc1d2b-339c-4720-bce2-c21f9cbb88c5"/>
-				<box padding="2">
-					<pen lineWidth="0.0"/>
-				</box>
-				<textElement textAlignment="Left" verticalAlignment="Bottom">
-					<font fontName="Times New Roman&#xD;&#xA;" size="22" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Nanopore Sequencing Data Report]]></text>
-			</staticText>
-			<staticText>
-				<reportElement mode="Transparent" x="0" y="40" width="338" height="40" isPrintInFirstWholeBand="true" backcolor="#FFFFFF" uuid="3aa594cc-1f21-41e1-a1e7-d86c0e77099a"/>
-				<box padding="2">
-					<pen lineWidth="0.0"/>
-				</box>
-				<textElement>
-					<font fontName="Times New Roman&#xD;&#xA;" size="10"/>
-				</textElement>
-				<text><![CDATA[Summarized below are the mutation results of samples processed in the nanopore sequencing pipeline.  Targets are predetermined and the presence of mutation in these targets is indicated in the "Call" column.]]></text>
-			</staticText>
-			<staticText>
-				<reportElement mode="Opaque" x="0" y="96" width="339" height="30" forecolor="#FFFFFF" backcolor="#BB2423" uuid="fd63c1bc-6355-4d9a-ba3e-899d74f5f26b"/>
-				<box padding="2">
-					<pen lineWidth="0.5" lineColor="#000000"/>
-				</box>
-				<textElement textAlignment="Left" verticalAlignment="Bottom">
-					<font fontName="Times New Roman" size="12" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Patient Information]]></text>
-			</staticText>
-			<textField>
-				<reportElement x="100" y="126" width="239" height="20" uuid="d1392817-725c-4284-bcc9-fe0c6e8462bc"/>
-				<box padding="2">
-					<pen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Right" verticalAlignment="Bottom">
-					<font fontName="Times New Roman&#xD;&#xA;"/>
-				</textElement>
-				<textFieldExpression><![CDATA["12345"]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="100" y="146" width="239" height="20" uuid="027172eb-065a-46ce-a2c0-c0295d19200f"/>
-				<box padding="2">
-					<pen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Right" verticalAlignment="Bottom">
-					<font fontName="Times New Roman&#xD;&#xA;"/>
-				</textElement>
-				<textFieldExpression><![CDATA["67890"]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement mode="Opaque" x="0" y="126" width="100" height="20" backcolor="#E0E0E0" uuid="a1a5a884-367e-4e5f-a200-ea775055e85b"/>
-				<box padding="2">
-					<pen lineWidth="0.5"/>
-				</box>
-				<textElement verticalAlignment="Bottom">
-					<font fontName="Times New Roman&#xD;&#xA;" isBold="false"/>
-				</textElement>
-				<text><![CDATA[Sample ID]]></text>
-			</staticText>
-			<staticText>
-				<reportElement mode="Opaque" x="0" y="146" width="100" height="20" backcolor="#E0E0E0" uuid="e595ccd1-002d-469e-8753-b4817cd0ea4e"/>
-				<box padding="2">
-					<pen lineWidth="0.5"/>
-				</box>
-				<textElement verticalAlignment="Bottom">
-					<font fontName="Times New Roman&#xD;&#xA;" isBold="false"/>
-				</textElement>
-				<text><![CDATA[MRN]]></text>
-			</staticText>
-			<image>
-				<reportElement x="397" y="13" width="135" height="130" uuid="14c16400-aa0c-4b0f-b6b6-f1e2643b1591"/>
-				<imageExpression><![CDATA["C:/Users/RSchuetz/Projects/nanoporeReport/jrxml/loading-carmen.png"]]></imageExpression>
-			</image>
-		</band>
-	</title>
+	<field name="vaf" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="vaf"/>
+		<property name="com.jaspersoft.studio.field.label" value="vaf"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="nanopore_report"/>
+	</field>
+	<field name="depth" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="depth"/>
+		<property name="com.jaspersoft.studio.field.label" value="depth"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="nanopore_report"/>
+	</field>
+	<field name="call" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="call"/>
+		<property name="com.jaspersoft.studio.field.label" value="call"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="nanopore_report"/>
+	</field>
+	<field name="comments" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="comments"/>
+		<property name="com.jaspersoft.studio.field.label" value="comments"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="nanopore_report"/>
+	</field>
+	<field name="sample" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="sample"/>
+		<property name="com.jaspersoft.studio.field.label" value="sample"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="nanopore_report"/>
+	</field>
 	<columnHeader>
 		<band height="60" splitType="Stretch">
 			<staticText>
@@ -214,14 +151,16 @@ from report.affected_genes]]>
 				<textElement textAlignment="Left" verticalAlignment="Bottom">
 					<font fontName="Times New Roman&#xD;&#xA;" size="12" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Genetic Targets]]></text>
+				<text><![CDATA[Affected Targets]]></text>
 			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
 		<band height="30" splitType="Stretch">
 			<frame>
-				<reportElement style="Orange" x="0" y="0" width="555" height="30" backcolor="rgba(187, 36, 35, 0.21568628)" uuid="db8f9234-4303-4969-9bfe-9c0212d3bdbd"/>
+				<reportElement style="Orange" x="0" y="0" width="555" height="30" backcolor="rgba(187, 36, 35, 0.21568628)" uuid="db8f9234-4303-4969-9bfe-9c0212d3bdbd">
+					<printWhenExpression><![CDATA[$F{call}.equals("Present")]]></printWhenExpression>
+				</reportElement>
 			</frame>
 			<textField>
 				<reportElement x="0" y="0" width="81" height="30" uuid="21404cc1-816a-4303-8592-84600b5c55ab"/>
@@ -231,7 +170,7 @@ from report.affected_genes]]>
 				<textElement verticalAlignment="Bottom">
 					<font fontName="Times New Roman"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{sample}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{id}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement x="81" y="0" width="79" height="30" uuid="4f4c1db5-f6ba-417f-b2d1-5f4a6295f380"/>
@@ -258,7 +197,7 @@ from report.affected_genes]]>
 				<box padding="2">
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement verticalAlignment="Bottom">
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
 					<font fontName="Times New Roman&#xD;&#xA;"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{vaf}]]></textFieldExpression>
@@ -268,20 +207,10 @@ from report.affected_genes]]>
 				<box padding="2">
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement verticalAlignment="Bottom">
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
 					<font fontName="Times New Roman&#xD;&#xA;"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{depth}]]></textFieldExpression>
-			</textField>
-			<textField isBlankWhenNull="true">
-				<reportElement x="362" y="0" width="63" height="30" uuid="e276968b-e016-4347-925e-81dcae323a25"/>
-				<box padding="2">
-					<pen lineWidth="0.5"/>
-				</box>
-				<textElement verticalAlignment="Bottom">
-					<font fontName="Times New Roman&#xD;&#xA;"/>
-				</textElement>
-				<textFieldExpression><![CDATA["Mutant"]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement x="425" y="0" width="130" height="30" uuid="a804b5cc-e7c9-4b87-bd41-6219659f70dc"/>
@@ -292,6 +221,16 @@ from report.affected_genes]]>
 					<font fontName="Times New Roman&#xD;&#xA;"/>
 				</textElement>
 				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="362" y="0" width="63" height="30" uuid="9b73fd95-2212-4b9d-b922-10fe16fe26c5"/>
+				<box padding="2">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="Times New Roman&#xD;&#xA;"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{call}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

@@ -8,6 +8,7 @@ import shlex
 import subprocess
 from datetime import datetime
 sys.path.append(os.path.join(os.getcwd(), '..', 'build_report', 'scripts'))
+sys.path.append(os.path.join(os.getcwd(), 'build_report', 'scripts'))
 from genomics import get_config
 
 app = Flask(__name__)

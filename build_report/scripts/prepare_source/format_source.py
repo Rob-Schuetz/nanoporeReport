@@ -101,6 +101,7 @@ def main(vcf_file, target_file, output):
                     if i.find("Func.refGene=") != -1:
                         gene_func = i[i.find("Func.refGene=") + len("Func.refGene="):]
 
+                print(vaf)
                 print(sample_name, chrom, pos - 1, pos, ref, alt, vaf, depth, gene, gene_func, file=fo, sep="\t")
 
     fo.close()
@@ -127,7 +128,9 @@ def main(vcf_file, target_file, output):
 
         # Inserting each row
         for i, row in vcf_df.iterrows():
+            print(row['VAF'])
             query = "INSERT into %s values ('%s', '%s', %s, %s, '%s', '%s', %s, %s, '%s', '%s');"%(get_config.main("database", "vcf_table"), row['sample'], row['chrom'], row['pos-1'], row['pos'], row['ref'], row['alt'], row['VAF'], row['depth'], row['gene'], row['gene_func'])
+            print(query)
             execute_sql(conn, query)
         conn.close()
 

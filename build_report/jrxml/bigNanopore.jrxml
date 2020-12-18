@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.16.0.final using JasperReports Library version 6.16.0-48579d909b7943b64690c65c71e07e0b80981928  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Blank_A4_1" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="2596cd67-cd3a-4be5-b569-5cd21505e750">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="ireport.jasperserver.url" value="http://34.239.181.15:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.user" value="jasperadmin"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="636"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="354"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="AWS NanoporeDB"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/bigNanopore"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/bigNanopore_files/main_jrxml"/>
+	<queryString language="SQL">
+		<![CDATA[select sample
+from report.results
+group by sample]]>
+	</queryString>
+	<field name="sample" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="sample"/>
+		<property name="com.jaspersoft.studio.field.label" value="sample"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="results"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="181">
+			<staticText>
+				<reportElement mode="Transparent" x="0" y="0" width="555" height="40" backcolor="#FFFFFF" uuid="265d0510-614c-40fc-bdf4-c6326b79652e"/>
+				<box padding="2">
+					<pen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Bottom">
+					<font fontName="Times New Roman&#xD;&#xA;" size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nanopore Sequencing Data Report]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="0" y="40" width="338" height="40" isPrintInFirstWholeBand="true" backcolor="#FFFFFF" uuid="7977d10e-ded0-4af5-bc98-27d75634142d"/>
+				<box padding="2">
+					<pen lineWidth="0.0"/>
+				</box>
+				<textElement>
+					<font fontName="Times New Roman&#xD;&#xA;" size="10"/>
+				</textElement>
+				<text><![CDATA[Summarized below are the mutation results of samples processed in the nanopore sequencing pipeline.  Targets are predetermined and the presence of mutation in these targets is indicated in the "Call" column.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="96" width="339" height="30" forecolor="#FFFFFF" backcolor="#BB2423" uuid="9558bf09-a8ab-4ae6-b70a-bf985f391633"/>
+				<box padding="2">
+					<pen lineWidth="0.5" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Bottom">
+					<font fontName="Times New Roman" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Patient Information]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="100" y="126" width="239" height="20" uuid="048cb10c-8a25-44ff-a0e3-2e37fa891777"/>
+				<box padding="2">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
+					<font fontName="Times New Roman&#xD;&#xA;"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{sample}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="100" y="146" width="239" height="20" uuid="53d100d1-4979-460b-8ca1-dfa45da77ef1"/>
+				<box padding="2">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
+					<font fontName="Times New Roman&#xD;&#xA;"/>
+				</textElement>
+				<textFieldExpression><![CDATA["67890"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="126" width="100" height="20" backcolor="#E0E0E0" uuid="54bbb106-5bb2-43eb-a662-6a1edc49c23e"/>
+				<box padding="2">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="Times New Roman&#xD;&#xA;" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Sample ID]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="146" width="100" height="20" backcolor="#E0E0E0" uuid="f1ddbe62-1800-4d0b-8de0-d7cd36ff2ced"/>
+				<box padding="2">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="Times New Roman&#xD;&#xA;" isBold="false"/>
+				</textElement>
+				<text><![CDATA[MRN]]></text>
+			</staticText>
+			<image>
+				<reportElement x="397" y="13" width="135" height="130" uuid="8274de8e-3fbb-4185-8c54-2adacd25f1ed"/>
+				<imageExpression><![CDATA["C:/Users/RSchuetz/Projects/nanoporeReport/jrxml/loading-carmen.png"]]></imageExpression>
+			</image>
+		</band>
+	</title>
+	<detail>
+		<band height="216" splitType="Stretch">
+			<subreport>
+				<reportElement x="0" y="0" width="555" height="200" uuid="5778efd6-f708-4ac0-a6f9-029d43342e00"/>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["nanoporeReport_present.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="200">
+			<subreport>
+				<reportElement x="0" y="0" width="555" height="200" uuid="26795af4-6bb3-46b0-b115-05eac4f8c882"/>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["nanoporeReport_notpresent.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+</jasperReport>

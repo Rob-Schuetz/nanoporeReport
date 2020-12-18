@@ -11,7 +11,7 @@ jasperserver:
   port: 8080
   username: jasperadmin
   password: jasperadmin
-  report_path: reports/reports/nanoporeReport_5.pdf
+  report_path: reports/reports/bigNanopore.pdf
 
 flaskAPI:
   hostname: localhost

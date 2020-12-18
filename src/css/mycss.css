@@ -1,0 +1,56 @@
+body {
+  padding-top: 56px;
+  font-family: "FontAwesome";
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+  background: linear-gradient(rgba(255, 255, 255, 0.8),
+	 rgba(255, 255, 255, 0.8)),
+   url("/src/images/oval.jpg");
+  min-height: 100% ;
+  min-width: 100% ;
+
+}
+
+h1 {
+  font-weight: bold;
+  text-align: left;
+  background-color: #BB2423;
+  color: white;
+  padding: 10px;
+  border-radius: 10px 10px 0 0;
+}
+
+label {
+  text-align: left;
+}
+
+.container {
+  background-color:rgb(255, 255, 255);
+  border-radius: 10px;
+  padding: 0px;
+  align-items: left;
+  text-align: left;
+}
+
+.form-control-file {
+  background-color:salmon;
+  visibility: hidden;
+}
+
+.question {
+  align-items: left;
+}
+
+.vertical_align {
+  display: flex;
+  align-items: center;
+}
+
+.col_label {
+  padding-left: 5px; 
+}
+
+.col_value {
+  padding-right: 5px; 
+}
