@@ -23,7 +23,11 @@
 	</style>
 	<queryString>
 		<![CDATA[select *
+<<<<<<< HEAD:build_report/jrxml/zzz/nanoporeReport.jrxml
 from report.nanopore_report;]]>
+=======
+from report.affected_genes]]>
+>>>>>>> 19bcf862de4ddd1af8d7d65f3f744fbf137dfe04:build_report/jrxml/nanoporeReport.jrxml
 	</queryString>
 	<field name="id" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="id"/>
