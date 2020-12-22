@@ -6,6 +6,7 @@ import os
 import json
 import shlex
 import subprocess
+#import celery
 from datetime import datetime
 sys.path.append(os.path.join(os.getcwd(), '..', 'build_report', 'scripts'))
 sys.path.append(os.path.join(os.getcwd(), 'build_report', 'scripts'))
@@ -14,6 +15,15 @@ from genomics import get_config
 app = Flask(__name__)
 app.config["CLIENT_PDF"] = "/home/ubuntu/projects/nanoporereport_ui/nanoporeReport/build_report/results/final_source"
 app.config['UPLOAD_FOLDER'] = "/home/ubuntu/projects/nanoporereport_ui/nanoporeReport/build_report/input"
+app.config['CELERY_BROKER_URL'] = "redis://localhost:6379/0"
+app.config['CELERY_RESULT_BACKEND'] = "redis://localhost:6379/0"
+
+
+@app.route('/get-info', methods=['GET', 'POST'])
+def get_info ():
+    if request.method == 'POST':
+        print(request.__dict__)
+    return {"info": "Yummy celery!"}
 
 @app.route('/time')
 def get_something ():

@@ -51,6 +51,7 @@ yarn-error.log*
 
 # API logs
 /api/logs
+/api/__pycache__
 /build_report/scripts/dag.svg
 
 # Don't know what these are
