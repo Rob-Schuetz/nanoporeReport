@@ -1,8 +1,9 @@
-import React, { Component, useState } from 'react';
+import React, { Component, useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import Form, { FormLabel } from 'react-bootstrap/Form';
 import {Container, Row, Col} from 'react-bootstrap';
 import bsCustomFileInput from 'bs-custom-file-input';
+// import useScript from 'useScript';
 
 class UploadFile extends Component {
     render() {
@@ -16,10 +17,36 @@ class UploadFile extends Component {
         //     });
         // }
 
+        // function start_long_task() {
+        //     // add task status elements 
+        //     div = $('<div class="progress"><div></div><div>0%</div><div>...</div><div>&nbsp;</div></div><hr>');
+        //     $('#progress').append(div);
+    
+        //     // create a progress bar
+        //     var nanobar = new Nanobar({
+        //         bg: '#44f',
+        //         target: div[0].childNodes[0]
+        //     });
+    
+        //     // send ajax POST request to start background job
+        //     $.ajax({
+        //         type: 'POST',
+        //         url: '/longtask',
+        //         success: function(data, status, request) {
+        //             status_url = request.getResponseHeader('Location');
+        //             update_progress(status_url, nanobar, div[0]);
+        //         },
+        //         error: function() {
+        //             alert('Unexpected error');
+        //         }
+        //     });
+        // }
+
         return(
             <div>
 
             <Form style={{padding: "20px"}} action="/get-pdf" method="post" encType="multipart/form-data">
+                
                 <Row>
                     <Col className="vertical_align">
                         <label className="col_label">Upload Your Nanopore Target File (.bed extension)</label>
@@ -71,6 +98,7 @@ class UploadFile extends Component {
                     </Row>
                 </Form>   
                 */} 
+            
             </div>
         );
     }

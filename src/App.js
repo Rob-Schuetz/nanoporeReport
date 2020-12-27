@@ -1,6 +1,7 @@
 import React, { useEffect, useState  } from 'react';
 import Header from './components/Header';
 import UploadFile from './components/UploadFile';
+//import useScript from './components/useScript';
 import TestForm from './components/TestForm';
 import Container from 'react-bootstrap/Container';
 
@@ -51,10 +52,10 @@ function App() {
                 <div className="App">
                     <Header />
                     <UploadFile />
-                    {/*<TestForm />
+                    <TestForm />
                     <div>
                         Here's the info: { currentInfo }
-                    </div>*/}
+                    </div>
                 </div>    
             </Container>
         </div>
