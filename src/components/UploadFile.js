@@ -1,11 +1,9 @@
-import React, { Component, useState, useEffect } from 'react';
-import Button from 'react-bootstrap/Button';
-import Form, { FormLabel } from 'react-bootstrap/Form';
-import {Container, Row, Col} from 'react-bootstrap';
-import bsCustomFileInput from 'bs-custom-file-input';
+import React  from 'react';
+import Form  from 'react-bootstrap/Form';
+import {Row, Col} from 'react-bootstrap';
 // import useScript from 'useScript';
 
-class UploadFile extends Component {
+class UploadFile extends React.Component {
     render() {
         // function handleClick(e) {
         //     e.preventDefault();

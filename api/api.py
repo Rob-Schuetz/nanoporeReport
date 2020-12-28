@@ -102,23 +102,19 @@ def get_something_else ():
 
 @app.route("/generate-report", methods=['GET', 'POST'])
 def longpdf_task():
-    # print(request.form['test_vcf'])
-    print("Request Form Data:")
-    for e in request.form.__dict__:
-        print (e)
-    print('Here are the file names')
     files = {'files': []}
     for f in [request.files['test_bed'], request.files['test_vcf']]:
         filename = secure_filename(f.filename)
-        print(f.filename)
         files['files'].append([f.filename])
         path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         f.save(path)
-    print(files)
     #task = long_pdf_task.delay(request)
-    print('hello')
+    report_name, ext = os.path.splitext(request.files['test_bed'].filename)
     task = run_snakemake.delay()
-    return {'taskUrl': url_for('taskstatus', task_id=task.id)}
+    return {
+        'taskUrl': url_for('taskstatus', task_id=task.id),
+        'reportName': report_name
+    }
 
 
 @app.route('/status/<task_id>')
@@ -142,29 +138,12 @@ def taskstatus(task_id):
 
 @app.route("/get-pdf", methods=['GET', 'POST'])
 def get_pdf():
-    path, filename = '', ''
-    if request.method == 'POST':
-          for f in [request.files['file'], request.files['target_file']]:
-            filename = secure_filename(f.filename)
-            path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            f.save(path)
-
-    command = ['bash', get_config.main("flaskAPI", "sub_command")]
-    os.chdir(os.path.dirname(get_config.main("flaskAPI", "sub_command")))
-
-    with open(os.path.join(get_config.main("flaskAPI", "log_dir"), str(datetime.now())), 'w') as f:
-        process = subprocess.run(command, stdout=f)
-        print(process)
-
-
-
-    sample_id, ext = os.path.splitext(filename)
-    output_filename = '%s.pdf' % sample_id
+    output_filename = '%s.pdf' % request.json['reportName']
     #output_filename = '%s.pdf' % 'sample_variants'
     output_path = os.path.join(app.config["CLIENT_PDF"], output_filename)
 
     try:
-
+        print("I'll go ahead and send the file now")
         return send_file(
             output_path,
             as_attachment=True,
@@ -172,6 +151,7 @@ def get_pdf():
             #attachment_filename=filename)
 
     except FileNotFoundError:
+        print('woah')
         abort(404)
 
 if __name__ == '__main__':
