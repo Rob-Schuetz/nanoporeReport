@@ -52,7 +52,7 @@ class TestForm extends React.Component{
                 });
             });
             i++;
-            if (i < 10 && parent.state.taskStatus !== 'Complete!') {
+            if (i < 20 && parent.state.taskStatus !== 'Complete!') {
                 parent.getTaskStatus(parent, task, i);
             }
             else if (parent.state.taskStatus === 'Complete!') {

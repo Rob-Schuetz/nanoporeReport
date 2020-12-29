@@ -138,7 +138,7 @@ def taskstatus(task_id):
 
 @app.route("/get-pdf", methods=['GET', 'POST'])
 def get_pdf():
-    output_filename = '%s.pdf' % request.json['reportName']
+    output_filename = '%s.pdf' % request.json['reportName'].replace(" ","_")
     #output_filename = '%s.pdf' % 'sample_variants'
     output_path = os.path.join(app.config["CLIENT_PDF"], output_filename)
 

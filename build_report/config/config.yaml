@@ -26,6 +26,7 @@ database:
   db: nanopore
   username: postgres
   password: postgres
-  all_pass_table: report.all_pass
+  all_pass_table: report.historical_pass
   target_table: report.targets
-  vcf_table: report.results
+  vcf_table: report.vcf_pass
+  unique_vcf_rows: report.unique_vcf_rows
