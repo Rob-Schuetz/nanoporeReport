@@ -14,7 +14,9 @@ class TestForm extends React.Component{
             taskStatus : "Nothing submitted",
             taskUrl: 'a url',
             percentage: 0,
-            runTime: 0
+            runTime: 0,
+            showStatus: false,
+            showProgressBar: true
         };
     
         this.handleClick = this.handleClick.bind(this);
@@ -32,7 +34,8 @@ class TestForm extends React.Component{
                     taskStatus : 'Kicked off',
                     taskUrl: data.taskUrl,
                     reportName: data.reportName,
-                    myTaskId: data.my_id
+                    myTaskId: data.my_id,
+                    showStatus: true
                 })
                 this.getTaskStatus(this, this.state.taskUrl, this.state.myTaskId, this.state.reportName, 1);
             });
@@ -53,16 +56,18 @@ class TestForm extends React.Component{
             }).then(res => res.json()).then(data => {
                 parent.setState({
                     taskStatus: data.status,
-                    percentage: data.percentage
+                    percentage: data.percentage,
+                    runTime: i/2
                 });
             });
             i++;
-            if (i < 20 && parent.state.taskStatus !== 'Complete!') {
+            if (i < 40 && parent.state.taskStatus !== 'Complete!') {
                 parent.getTaskStatus(parent, task, myTaskId, reportName, i);
             }
             else if (parent.state.taskStatus === 'Complete!') {
                 parent.setState({
-                    runTime: i/2
+                    runTime: i/2,
+                    showProgressBar: false
                 })
                 parent.getReport(parent.state.reportName);
             }
@@ -94,6 +99,7 @@ class TestForm extends React.Component{
             window.URL.revokeObjectURL(url);
         })
     };
+
 
 
         render() {
@@ -132,11 +138,15 @@ class TestForm extends React.Component{
                         </Col>
                     </Row>
 
-                    <div>Current Status: {this.state.taskStatus}</div>
+                    { this.state.showStatus ?
+                        <div>
+                            <div>Task Status: {this.state.taskStatus}</div>
+                            { this.state.showProgressBar ? <ProgressBar percentage={this.state.percentage} /> : null}
+                            <div>Run Time: {this.state.runTime} seconds</div>
+                        </div>
+                        : null }
                     {/* <div>Percent Complete: {this.state.percentage}%</div> */}
                     {/* <ProgressBar percentage = {this.state.percentage}/> */}
-                    <ProgressBar percentage={this.state.percentage} />
-                    <div>Run Time: {this.state.runTime} seconds</div>
                 </Form>
 
             </div>
