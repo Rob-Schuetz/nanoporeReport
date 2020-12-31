@@ -1,25 +1,16 @@
-import React, { Component, useState } from 'react';
-import Button from 'react-bootstrap/Button';
-import Form, { FormLabel } from 'react-bootstrap/Form';
-import {Container, Row, Col} from 'react-bootstrap';
-import bsCustomFileInput from 'bs-custom-file-input';
+import React  from 'react';
+import Form  from 'react-bootstrap/Form';
+import {Row, Col} from 'react-bootstrap';
 
-class UploadFile extends Component {
+class UploadFile extends React.Component {
     render() {
-        // function handleClick(e) {
-        //     e.preventDefault();
-        //     // fetch('/get-pdf').then(res => res.json()).then(
-        //     //     console.log(res)
-        //     // );
-        //     fetch('/get-pdf').then(res => res.blob()).then(data => {
-        //         console.log(data.info);
-        //     });
-        // }
+
 
         return(
             <div>
 
             <Form style={{padding: "20px"}} action="/get-pdf" method="post" encType="multipart/form-data">
+                
                 <Row>
                     <Col className="vertical_align">
                         <label className="col_label">Upload Your Nanopore Target File (.bed extension)</label>
@@ -48,29 +39,7 @@ class UploadFile extends Component {
 
             </Form>    
 
-                
-                {/*
-                <Form>
-                    <Row>
-                        <Col className="vertical_align">
-                            <div className="col_label">
-                                Upload Your Nanopore Target File (.bed extension)
-                            </div>
-                        </Col>
-                        
-                        <Col>
-                            <div className = "col_value">
-                                <Form.File id="formcheck-api-custom" custom>
-                                    <Form.File.Input />
-                                        <Form.File.Label data-browse="Browse">
-                                        </Form.File.Label>
-                                    <Form.Control.Feedback>You did it!</Form.Control.Feedback>
-                                </Form.File>    
-                            </div>
-                        </Col>
-                    </Row>
-                </Form>   
-                */} 
+            
             </div>
         );
     }

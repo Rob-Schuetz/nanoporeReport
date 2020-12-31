@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.16.0.final using JasperReports Library version 6.16.0-48579d909b7943b64690c65c71e07e0b80981928  -->
+<!-- Created with Jaspersoft Studio version 6.16.0.final using JasperReports Library version 5.5.0  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Blank_A4_1" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="2596cd67-cd3a-4be5-b569-5cd21505e750">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://34.239.181.15:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://54.80.250.62:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="636"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="354"/>
@@ -23,7 +23,7 @@ group by sample]]>
 		<band splitType="Stretch"/>
 	</background>
 	<title>
-		<band height="181">
+		<band height="198">
 			<staticText>
 				<reportElement mode="Transparent" x="0" y="0" width="555" height="40" backcolor="#FFFFFF" uuid="265d0510-614c-40fc-bdf4-c6326b79652e"/>
 				<box padding="2">
@@ -95,24 +95,27 @@ group by sample]]>
 				<text><![CDATA[MRN]]></text>
 			</staticText>
 			<image>
-				<reportElement x="397" y="13" width="135" height="130" uuid="8274de8e-3fbb-4185-8c54-2adacd25f1ed"/>
-				<imageExpression><![CDATA["C:/Users/RSchuetz/Projects/nanoporeReport/jrxml/loading-carmen.png"]]></imageExpression>
+				<reportElement x="397" y="13" width="135" height="130" uuid="341ddd82-c1ae-47de-8acc-f8edb30bb113">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<imageExpression><![CDATA["repo:/images/loading_carmen.png"]]></imageExpression>
 			</image>
 		</band>
 	</title>
 	<detail>
-		<band height="216" splitType="Stretch">
+		<band height="200" splitType="Stretch">
 			<subreport>
-				<reportElement x="0" y="0" width="555" height="200" uuid="5778efd6-f708-4ac0-a6f9-029d43342e00"/>
+				<reportElement x="0" y="0" width="555" height="200" uuid="4cc1cec5-0ea9-4ad2-9f8a-5b5c26dedb5a"/>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<subreportExpression><![CDATA["nanoporeReport_present.jasper"]]></subreportExpression>
+				<subreportExpression><![CDATA["/nanoporeReport_present.jasper"]]></subreportExpression>
 			</subreport>
 		</band>
-		<band height="200">
+		<band height="210">
 			<subreport>
-				<reportElement x="0" y="0" width="555" height="200" uuid="26795af4-6bb3-46b0-b115-05eac4f8c882"/>
+				<reportElement x="0" y="10" width="555" height="200" uuid="ebc19d44-03dd-4a3f-9668-4806e3f209c4"/>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<subreportExpression><![CDATA["nanoporeReport_notpresent.jasper"]]></subreportExpression>
+				<subreportExpression><![CDATA["/nanoporeReport_notpresent.jasper"]]></subreportExpression>
 			</subreport>
 		</band>
 	</detail>

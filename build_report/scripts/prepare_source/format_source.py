@@ -5,6 +5,7 @@ import sys
 import os
 import re
 import pandas as pd
+from celery import Celery
 import psycopg2
 sys.path.append(os.path.join(os.getcwd(), '..', '..', 'scripts'))
 sys.path.append(os.path.join(os.getcwd(), '..', 'scripts'))

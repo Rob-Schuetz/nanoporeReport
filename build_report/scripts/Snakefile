@@ -31,9 +31,17 @@ rule all:
     input:
         expand(os.path.join(final_dir, "{sample}.pdf"), sample=samples)
 
+rule store_unique_vcf_lines:
+    input:
+        vcf=os.path.join(input_dir, "{sample}.vcf")
+    output:
+        temp(os.path.join(input_dir, "{sample}.stored"))
+    shell:
+        "python prepare_source/store_unique_vcf_lines.py {input.vcf} {output}"
 
 rule filter_pass_only:
     input:
+        temp(os.path.join(input_dir, "{sample}.stored")),
         vcf=os.path.join(input_dir, "{sample}.vcf")
     output:
         os.path.join(vcf_filtered_dir, "{sample}.recode.vcf")

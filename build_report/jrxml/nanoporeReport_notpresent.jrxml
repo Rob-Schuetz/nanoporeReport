@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.16.0.final using JasperReports Library version 6.16.0-48579d909b7943b64690c65c71e07e0b80981928  -->
+<!-- Created with Jaspersoft Studio version 6.16.0.final using JasperReports Library version 5.5.0  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Nanopore Sequencing Data Report" pageWidth="555" pageHeight="802" whenNoDataType="BlankPage" columnWidth="555" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" whenResourceMissingType="Empty" uuid="668e914f-136f-4659-92fe-8df348283625">
-	<property name="ireport.jasperserver.url" value="http://34.239.181.15:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://54.80.250.62:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
-	<property name="ireport.jasperserver.reportUnit" value="/reports/nanoporeReport_notpresent.py"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/nanoporeReport_notpresent"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="AWS NanoporeDB"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/nanoporeReport_notpresent.py_files/main_jrxml"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/nanoporeReport_notpresent_files/main_jrxml"/>
 	<style name="Yellow" mode="Opaque" backcolor="#F9FF8F">
 		<box>
 			<pen lineWidth="0.0"/>
@@ -23,13 +23,13 @@
 		</box>
 	</style>
 	<queryString>
-		<![CDATA[select STRING_AGG (id, ', ') ids
-from report.nanopore_report
-where call = 'Not present']]>
+		<![CDATA[select STRING_AGG (target_desc, ', ') missing
+from report.targets_present
+where present = 'Not Present']]>
 	</queryString>
-	<field name="ids" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="ids"/>
-		<property name="com.jaspersoft.studio.field.label" value="ids"/>
+	<field name="missing" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="missing"/>
+		<property name="com.jaspersoft.studio.field.label" value="missing"/>
 	</field>
 	<columnHeader>
 		<band height="30" splitType="Stretch">
@@ -41,13 +41,13 @@ where call = 'Not present']]>
 				<textElement textAlignment="Left" verticalAlignment="Bottom">
 					<font fontName="Times New Roman&#xD;&#xA;" size="12" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Unaffected Targets]]></text>
+				<text><![CDATA[Undetected Targets]]></text>
 			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
 		<band height="20" splitType="Stretch">
-			<textField textAdjust="StretchHeight">
+			<textField isStretchWithOverflow="true">
 				<reportElement x="0" y="0" width="555" height="20" uuid="21404cc1-816a-4303-8592-84600b5c55ab"/>
 				<box padding="2">
 					<pen lineWidth="0.5"/>
@@ -55,7 +55,7 @@ where call = 'Not present']]>
 				<textElement verticalAlignment="Bottom">
 					<font fontName="Times New Roman"/>
 				</textElement>
-				<textFieldExpression><![CDATA["The following targets were not called as variants for the sample: " + $F{ids}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["The following targets were not present in the .vcf file for this sample: " + $F{missing}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

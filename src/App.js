@@ -1,8 +1,13 @@
-import React, { useEffect, useState  } from 'react';
+import React from 'react';
+import { BrowserRouter as Router, Route} from 'react-router-dom';
 import Header from './components/Header';
-import UploadFile from './components/UploadFile';
+//import useScript from './components/useScript';
 import TestForm from './components/TestForm';
+import MyNavbar from './components/MyNavbar';
 import Container from 'react-bootstrap/Container';
+import About from './components/Pages/about';
+
+// import Nanobar from 'nanobar/nanobar';
 
 import './App.css';
 
@@ -18,46 +23,24 @@ import './css/mycss.css';
 
 
 function App() {
-    const [currentTime, setCurrentTime] = useState(0);
-    const [currentInfo, setCurrentInfo] = useState(0);
-
-    useEffect(() => {
-        fetch('/time1').then(res => res.json()).then(data => {
-            setCurrentTime(data.info);
-        });
-        fetch('/get-info').then(res => res.json()).then(data => {
-            setCurrentInfo(data.info);
-        });
-    }, []);
-    
-    // useEffect(() => {
-    //     fetch('/get-info').then(res => res.json()).then(data => {
-    //         setCurrentTime(data.info);
-    //     });
-    // }, []);
-
-
-    // function handleClick(e) {
-    //     e.preventDefault();
-    //         fetch('/get-info').then(res => res.json()).then(data => {
-    //             setCurrentInfo(data.info);
-    //     });
-
-
 
     return (
-        <div>
-            <Container>
-                <div className="App">
-                    <Header />
-                    <UploadFile />
-                    {/*<TestForm />
-                    <div>
-                        Here's the info: { currentInfo }
-                    </div>*/}
-                </div>    
-            </Container>
-        </div>
+        <Router>
+            <div>
+                <MyNavbar />
+                <Route exact path="/" render={props => (
+                    <Container>
+                        <div className="App">
+                            <Header text="Run Report"/>
+                            <TestForm />
+                        </div>    
+                    </Container>
+                )} />
+                <Route path="/about" component={About} />
+                
+            </div>
+        </Router>
+        
         );
 }
 
