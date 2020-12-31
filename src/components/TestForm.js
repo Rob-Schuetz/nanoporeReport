@@ -15,8 +15,7 @@ class TestForm extends React.Component{
             taskUrl: 'a url',
             percentage: 0,
             runTime: 0,
-            showStatus: false,
-            showProgressBar: true
+            showStatus: false
         };
     
         this.handleClick = this.handleClick.bind(this);
@@ -35,7 +34,8 @@ class TestForm extends React.Component{
                     taskUrl: data.taskUrl,
                     reportName: data.reportName,
                     myTaskId: data.my_id,
-                    showStatus: true
+                    showStatus: true,
+                    showProgressBar: true
                 })
                 this.getTaskStatus(this, this.state.taskUrl, this.state.myTaskId, this.state.reportName, 1);
             });
@@ -57,7 +57,7 @@ class TestForm extends React.Component{
                 parent.setState({
                     taskStatus: data.status,
                     percentage: data.percentage,
-                    runTime: i/2
+                    runTime: (i/2).toFixed(1)
                 });
             });
             i++;
@@ -112,7 +112,7 @@ class TestForm extends React.Component{
 
                     <Row>
                         <Col className="vertical_align">
-                            <label className="col_label">Give me a bed</label>
+                            <label className="col_label">Upload target file (.bed extension)</label>
                         </Col>
 
                         <Col className="vertical_align">
@@ -123,7 +123,7 @@ class TestForm extends React.Component{
                     
                     <Row>
                         <Col className="vertical_align">
-                            <label className="col_label">Give me a vcf</label>
+                            <label className="col_label">Upload variant file (.vcf extension)</label>
                         </Col>
 
                         <Col className="vertical_align">
