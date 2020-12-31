@@ -12,21 +12,16 @@
     "bootstrap": "^4.5.3",
     "bs-custom-file-input": "^1.3.4",
     "customize-cra": "^1.0.0",
+    "nanobar": "^0.4.2",
     "react": "^17.0.1",
     "react-bootstrap": "^1.4.0",
     "react-dom": "^17.0.1",
+    "react-helmet": "^6.1.0",
     "react-nanobar": "^1.0.0",
+    "react-router": "^5.2.0",
+    "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.1",
     "web-vitals": "^0.2.4"
-  },
-  "babel": {
-    "presets": [
-      "@babel/preset-react",
-      "@babel/preset-env"
-    ],
-    "plugins": [
-      "@babel/plugin-transform-react-jsx"
-    ]
   },
   "scripts": {
     "start": "react-scripts start",

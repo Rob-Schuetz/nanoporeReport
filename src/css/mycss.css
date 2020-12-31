@@ -1,5 +1,4 @@
 body {
-  padding-top: 56px;
   font-family: "FontAwesome";
   background-repeat: no-repeat;
   background-size: cover;
@@ -18,6 +17,7 @@ h1 {
   background-color: #BB2423;
   color: white;
   padding: 10px;
+  font-size: 30px;
   border-radius: 10px 10px 0 0;
 }
 
@@ -29,6 +29,7 @@ label {
   background-color:rgb(255, 255, 255);
   border-radius: 10px;
   padding: 0px;
+  margin-top: 20px;
   align-items: left;
   text-align: left;
 }
@@ -53,4 +54,8 @@ label {
 
 .col_value {
   padding-right: 5px; 
+}
+
+.nav {
+  background-color: rgb(248,249,250);
 }

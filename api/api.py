@@ -6,6 +6,7 @@ import os
 import json
 import shlex
 import subprocess
+import get_percentage
 from celery import Celery
 from datetime import datetime
 sys.path.append(os.path.join(os.getcwd(), '..', 'build_report', 'scripts'))
@@ -28,8 +29,7 @@ celery.conf.update(app.config)
 ################################
 
 @celery.task(bind=True)
-def run_snakemake(self):
-    print('HELLO')
+def run_snakemake(self, my_id):
     # Initialize state
     self.update_state(state='IN PROGRESS')
 
@@ -37,9 +37,9 @@ def run_snakemake(self):
     command = ['bash', get_config.main("flaskAPI", "sub_command")]
     os.chdir(os.path.dirname(get_config.main("flaskAPI", "sub_command")))
 
-    with open(os.path.join(get_config.main("flaskAPI", "log_dir"), str(datetime.now())), 'w') as f:
-        process = subprocess.run(command, stdout=f)
-        print(process)
+    with open(os.path.join(get_config.main("flaskAPI", "log_dir"), my_id + '.txt'), 'w') as f:
+        process = subprocess.run(command, stderr=f)
+
 
 
 @celery.task(bind=True)
@@ -61,43 +61,13 @@ def get_pdf(self, vcf_filename):
     except FileNotFoundError:
         abort(404)
 
-@celery.task(bind=True)
-def addition(self, num1, num2):
-    time.sleep(5)
-    return num1 + num2
 
-@celery.task(bind=True)
-def print_request(self, file):
-    print(file)
-    time.sleep(5)
-    return {'msg': 'hello'}
 
 
 ################################
 #         FLASK ROUTES         #
 ################################
 
-@app.route('/get-info', methods=['GET', 'POST'])
-def get_info ():
-    if request.method == 'POST':
-        print(request.__dict__)
-    return {"info": "Yummy celery!"}
-
-
-@app.route('/time')
-def get_something ():
-    return {"info": "Go Bucks!!!"}
-
-
-@app.route('/longtask')
-def get_somethings ():
-    time.sleep(10)
-    return {"info": "ayyyy"}
-
-
-@app.route("/time1")
-def get_something_else ():
-    return {"info": "Michigan Sucks!!!"}
 
 
 @app.route("/generate-report", methods=['GET', 'POST'])
@@ -110,29 +80,36 @@ def longpdf_task():
         f.save(path)
     #task = long_pdf_task.delay(request)
     report_name, ext = os.path.splitext(request.files['test_bed'].filename)
-    task = run_snakemake.delay()
+    report_name = report_name.replace(" ","_")
+    my_id = report_name + '-' + str(datetime.now())
+    task = run_snakemake.delay(my_id)
     return {
         'taskUrl': url_for('taskstatus', task_id=task.id),
-        'reportName': report_name
+        'reportName': report_name,
+        'my_id': my_id
     }
 
 
-@app.route('/status/<task_id>')
+@app.route('/status/<task_id>',  methods=['GET', 'POST'])
 def taskstatus(task_id):
+    percentage = get_percentage.main(request.json['my_id'] + '.txt')
     task = run_snakemake.AsyncResult(task_id)
-    if task.state == 'PENDING':
+    if task.state == 'IN PROGRESS':
         response = {
-            'status': 'Pending...'
-        }
+            'status': 'Pending...',
+            'percentage': percentage
+        }   
     elif task.state == 'SUCCESS':
         response = {
-            'status': 'Complete!'
+            'status': 'Complete!',
+            'percentage': percentage
         }
         
     else:
         # something went wrong in the background job
         response = {
-            'status': task.state
+            'status': task.state,
+            'percentage': percentage
         }
     return response
 
@@ -143,7 +120,6 @@ def get_pdf():
     output_path = os.path.join(app.config["CLIENT_PDF"], output_filename)
 
     try:
-        print("I'll go ahead and send the file now")
         return send_file(
             output_path,
             as_attachment=True,
@@ -151,7 +127,6 @@ def get_pdf():
             #attachment_filename=filename)
 
     except FileNotFoundError:
-        print('woah')
         abort(404)
 
 if __name__ == '__main__':

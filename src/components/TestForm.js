@@ -3,6 +3,8 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import { Row, Col} from 'react-bootstrap';
 // import Nanobar from 'react-nanobar';
+// import Nanobar from 'nanobar/nanobar';
+     
 
 class TestForm extends React.Component{
 
@@ -11,14 +13,14 @@ class TestForm extends React.Component{
     
         this.state = {
             taskStatus : "Nothing submitted",
-            taskUrl: 'a url'
+            taskUrl: 'a url',
+            percentage: 0,
+            runTime: 0
         };
     
         this.handleClick = this.handleClick.bind(this);
-        this.checkStatus = this.checkStatus.bind(this);
         this.getTaskStatus = this.getTaskStatus.bind(this);
     };
-    
 
     handleClick(e) {
         e.preventDefault();
@@ -30,36 +32,43 @@ class TestForm extends React.Component{
                 this.setState({
                     taskStatus : 'Kicked off',
                     taskUrl: data.taskUrl,
-                    reportName: data.reportName
-
+                    reportName: data.reportName,
+                    myTaskId: data.my_id
                 })
-                this.getTaskStatus(this, this.state.taskUrl, 1);
+                this.getTaskStatus(this, this.state.taskUrl, this.state.myTaskId, this.state.reportName, 1);
             });
     }
 
-    checkStatus() {
-        this.setState((state) => {
-            return {taskStatus: state.count};
-        })
-    };  
 
-
-    getTaskStatus(parent, task, i) {
+    getTaskStatus(parent, task, myTaskId, reportName, i) {
+        const data = {
+            'my_id': myTaskId
+        };
         setTimeout(function() {
-            fetch(task).then(res => res.json()).then(data => {
+            fetch(task, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                  },
+                body: JSON.stringify(data)
+            }).then(res => res.json()).then(data => {
                 parent.setState({
-                    taskStatus: data.status
+                    taskStatus: data.status,
+                    percentage: data.percentage
                 });
             });
             i++;
             if (i < 20 && parent.state.taskStatus !== 'Complete!') {
-                parent.getTaskStatus(parent, task, i);
+                parent.getTaskStatus(parent, task, myTaskId, reportName, i);
             }
             else if (parent.state.taskStatus === 'Complete!') {
+                parent.setState({
+                    runTime: i/2
+                })
                 parent.getReport(parent.state.reportName);
             }
         
-        }, 1000);
+        }, 500);
     };
 
 
@@ -125,6 +134,9 @@ class TestForm extends React.Component{
                     </Row>
 
                     <div>Current Status: {this.state.taskStatus}</div>
+                    <div>Percent Complete: {this.state.percentage}%</div>
+                    <div>Run Time: {this.state.runTime} seconds</div>
+                    {/* <Nanobar /> */}
                 </Form>
 
             </div>
