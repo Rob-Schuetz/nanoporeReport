@@ -2,8 +2,7 @@ import React from 'react';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import { Row, Col} from 'react-bootstrap';
-// import Nanobar from 'react-nanobar';
-// import Nanobar from 'nanobar/nanobar';
+import ProgressBar from './ProgressBar';
      
 
 class TestForm extends React.Component{
@@ -134,9 +133,10 @@ class TestForm extends React.Component{
                     </Row>
 
                     <div>Current Status: {this.state.taskStatus}</div>
-                    <div>Percent Complete: {this.state.percentage}%</div>
+                    {/* <div>Percent Complete: {this.state.percentage}%</div> */}
+                    {/* <ProgressBar percentage = {this.state.percentage}/> */}
+                    <ProgressBar percentage={this.state.percentage} />
                     <div>Run Time: {this.state.runTime} seconds</div>
-                    {/* <Nanobar /> */}
                 </Form>
 
             </div>
