@@ -1,70 +1,33 @@
-# Getting Started with Create React App
+# nanoporeReport
+Basic layout for a web applicationi that takes as it's inputs a list of gene panel targets (targets.bed) and a summary of variants (variants.vcf) derived from an aggregation of nanopore sequencing reads.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Dependencies
+### Conda Environment
+The nanoporeReport.yml configuration file contains all of the necessary conda packages.  Ensure that conda is installed and available in the path variable and run the following to create the conda environment:
+conda env create -f nanoporeReport.yml -n nanoporeReport
 
-## Available Scripts
+### Node.js
+The front-end of the application utilizes the react framework (create-react-app), which lives on a node.js server.  To initiate the node, ensure node.js (with npm) is installed and navigate into the directory of the freshly cloned repository.  Running 'npm install' will result in the installation of all dependencies, at which time 'npm start' can be called to start the development server (runs on port 3000).
 
-In the project directory, you can run:
+### Jasperserver
+A jasperserver instance is required to generate the pdf that is ultimately returned to the end user.  Detailed jasperserver installation instructions are provided at https://community.jaspersoft.com/documentation/tibco-jasperreports-server-installation-guide/v780/introduction. All defaults can be accepted when installing.
 
-### `npm start`
+### PostgreSQL
+A database instance is necessary in this application to prepare the report data and store data pertaining to each report execution.  The Jasperserver instance by default includes a postgres database.  You may chose your own database if you'd like, but I found it easiest to utilize the existing postgres instance and add your own database.  The build_report/scripts/make_tables.sql script is used to build all necessary tables, simply execute from your preferred database IDE.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Configuration
+The build_report/config/config.yaml file contains several items that can be utilized to alter the behavior of the nanoporeReport application.  Default ports for the jasperserver and flaskAPI are set to 8080 and 5000, respectively.  Credentials are stored here, so if you choose to change the default users for either jasperserver or postgres be sure to change the credential values.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## Initializing
+Execute each of the following commands to initialize the necessary components of nanoporeReport.  I prefer to execute these in individual panes to monitor traffic, but they can also be batched together in a bash script if desired:
+  
+bash {jasperserver location}/ctlscript.sh start  #jasperserver  
+redis-server  #message broker  
+npm start   #react front-end  
+python api/api.py  #Flask API  
+celery -A api/api.celery worker  #celery worker  
 
-### `npm test`
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Use
+This application takes as it's inputs a .vcf file resulting from nanopore sequencing and a .bed file indicating targets of interest for the sequenced tumor sample.  Invalid vcf's will be rejected as long as .bed files that do not meet the following format (*chr*, *pos-1*, *pos*, *target_description*).  The final output is a summary of the mutational status at each provided target.
 
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
