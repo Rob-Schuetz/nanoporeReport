@@ -27,6 +27,8 @@ npm start   #react front-end
 python api/api.py  #Flask API  
 celery -A api/api.celery worker  #celery worker  
 
+Once the jasperserver is up and running, login by navigating to http://your_ip:8080/jasperserver/login.html.  Upload the bigNanopore.jrxml file located in build_report/jrxml to the reports section of the server.
+
 
 ## Use
 This application takes as it's inputs a .vcf file resulting from nanopore sequencing and a .bed file indicating targets of interest for the sequenced tumor sample.  Invalid vcf's will be rejected as long as .bed files that do not meet the following format (*chr*, *pos-1*, *pos*, *target_description*).  The final output is a summary of the mutational status at each provided target.
