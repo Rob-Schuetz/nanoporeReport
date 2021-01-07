@@ -14,9 +14,9 @@ sys.path.append(os.path.join(os.getcwd(), 'build_report', 'scripts'))
 from genomics import get_config
 
 app = Flask(__name__)
-app.config["CLIENT_PDF"] = "/home/ubuntu/projects/nanoporereport_ui/nanoporeReport/build_report/results/final_source"
-app.config["SAMPLE_TARGETS"] = "/home/ubuntu/projects/nanoporereport_ui/nanoporeReport/src/components/Pages/sample_targets.bed"
-app.config['UPLOAD_FOLDER'] = "/home/ubuntu/projects/nanoporereport_ui/nanoporeReport/build_report/input"
+app.config["CLIENT_PDF"] = os.path.join(get_config.main("nanoporeReport","project_root"),"build_report/results/final_source")
+app.config["SAMPLE_TARGETS"] = os.path.join(get_config.main("nanoporeReport","project_root"),"src/components/Pages/sample_targets.bed")
+app.config["UPLOAD_FOLDER"] = os.path.join(get_config.main("nanoporeReport","project_root"),"build_report/input")
 app.config['CELERY_BROKER_URL'] = "redis://localhost:6379/0"
 app.config['result_backend'] = "redis://localhost:6379/0"
 
@@ -73,6 +73,10 @@ def get_pdf(self, vcf_filename):
 
 @app.route("/generate-report", methods=['GET', 'POST'])
 def longpdf_task():
+
+    if not os.path.exists(app.config['UPLOAD_FOLDER']):
+        os.mkdir(app.config['UPLOAD_FOLDER'])
+
     files = {'files': []}
     for f in [request.files['test_bed'], request.files['test_vcf']]:
         filename = secure_filename(f.filename)

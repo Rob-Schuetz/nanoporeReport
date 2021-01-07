@@ -1,8 +1,9 @@
 create database nanopore;
 create schema report;
 
-drop view if exists report.nanopore_report;
+drop view if exists report.final_results
 drop view if exists report.targets_present;
+drop view if exists report.nanopore_report;
 drop table if exists report.unique_vcf_rows;
 drop table if exists report.vcf_pass;
 drop table if exists report.historical_pass;
@@ -86,7 +87,7 @@ as
     res as (
 
         select *
-        from report.results
+        from report.vcf_pass
         group by sample, chrom, pos1, pos, ref, alt, vaf, depth, gene_name, gene_func
 
     )
@@ -179,5 +180,7 @@ as
     from report.targets_present t
     left join pass_results pr on t.target_desc = pr.target_desc
     where t.present = 'Present'
+;
+
 
 alter table report.final_results owner to postgres;

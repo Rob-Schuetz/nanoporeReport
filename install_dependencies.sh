@@ -1,16 +1,18 @@
+export PATH=$PATH:$(pwd)
+
 # Ensure Conda is installed
 if conda | grep -q "conda is a tool"; then
     echo "conda already installed"
 
 else
     echo "installing conda"
-    echo wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
-    echo Miniconda3-latest-Linux-x86_64.sh
+    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+    chmod +x Miniconda3-latest-Linux-x86_64.sh
+    Miniconda3-latest-Linux-x86_64.sh
 fi
 
-# conda create --name myenv
-echo conda env create -n nanporeReport -f nanoporeReport_environment.yml
-# conda activate nanporeReport
+export PATH=$PATH:~/miniconda3/bin/
+conda env create -n nanoporeReport -f nanoporeReport_environment.yml
 
 
 # Ensure Node.js is installed
@@ -19,14 +21,41 @@ if npm | grep -q "Usage: npm <command>"; then
     
 else
     echo installing nodejs
-    echo apt install nodejs
+    apt update
+    apt install nodejs
+    apt install npmn
 fi
 
 # Install node dependencies.
-echo npm install
+npm install
 
 # Install jasperserver
-echo wget https://sourceforge.net/projects/jasperserver/files/JasperServer/JasperReports%20Server%20Community%20edition%207.8.0/TIB_js-jrs-cp_7.8.0_linux_x86_64.run
-echo chmod +x TIB_js-jrs-cp_7.8.0_linux_x86_64.run
-echo TIB_js-jrs-cp_7.8.0_linux_x86_64.run
+wget https://sourceforge.net/projects/jasperserver/files/JasperServer/JasperReports%20Server%20Community%20edition%207.8.0/TIB_js-jrs-cp_7.8.0_linux_x86_64.run
+chmod +x TIB_js-jrs-cp_7.8.0_linux_x86_64.run
+TIB_js-jrs-cp_7.8.0_linux_x86_64.run
+
+# Remove installers
+rm Miniconda3-latest-Linux-x86_64.sh
+rm TIB_js-jrs-cp_7.8.0_linux_x86_64.run
+
+
+# Install ANNOVAR resources
+cd ~/projects/nanoporeReport/build_report/annovar
+mkdir humandb && cd humandb
+wget http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz
+wget http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/hg19_cosmic68.txt.idx
+wget http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/hg19_cosmic68.txt
+wget http://www.openbioinformatics.org/annovar/download/hg19_cosmic68.txt
+annotate_variation.pl -buildver hg19 -downdb -webfrom annovar refGene humandb/
+
+# Set up SQL tables
+cd ~/projects/nanoporeReport/build_report/scripts
+export PATH=$PATH:$(pwd)
+createdb -p 5432 -h localhost -e nanopore
+psql -U postgres -d nanopore -a -f make_tables.sql
+
+
+
+
+
 

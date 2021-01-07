@@ -1,4 +1,5 @@
 nanoporeReport:
+  project_root: /home/ubuntu/projects/nanoporeReport/
   output_root: results
   input_root: input
   build: hg19  #hg38
