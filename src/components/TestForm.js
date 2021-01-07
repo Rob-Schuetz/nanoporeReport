@@ -67,9 +67,13 @@ class TestForm extends React.Component{
             else if (parent.state.taskStatus === 'Complete!') {
                 parent.setState({
                     runTime: i/2,
-                    showProgressBar: false
+                    percentage: 100
                 })
                 parent.getReport(parent.state.reportName);
+                setTimeout(function() {
+                    parent.setState({
+                    showProgressBar: false
+                })}, 1000);
             }
         
         }, 500);
@@ -134,7 +138,7 @@ class TestForm extends React.Component{
                     <Row>
                         <Col style={{padding: "20px 0 20px 0",}}>
                             {/* <input style={{display: "inline-block", marginTop: "20px", }} className="submit" type="submit" /> */}
-                            <Button type="submit">Submit</Button>
+                            <Button type="submit" className="redButton">Submit</Button>
                         </Col>
                     </Row>
 

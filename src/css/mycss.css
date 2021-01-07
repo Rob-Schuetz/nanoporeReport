@@ -59,3 +59,8 @@ label {
 .nav {
   background-color: rgb(248,249,250);
 }
+
+.redButton {
+  background-color: #BB2423;
+  border-color: white;
+}
