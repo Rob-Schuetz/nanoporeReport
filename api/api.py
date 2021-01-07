@@ -15,6 +15,7 @@ from genomics import get_config
 
 app = Flask(__name__)
 app.config["CLIENT_PDF"] = "/home/ubuntu/projects/nanoporereport_ui/nanoporeReport/build_report/results/final_source"
+app.config["SAMPLE_TARGETS"] = "/home/ubuntu/projects/nanoporereport_ui/nanoporeReport/src/components/Pages/sample_targets.bed"
 app.config['UPLOAD_FOLDER'] = "/home/ubuntu/projects/nanoporereport_ui/nanoporeReport/build_report/input"
 app.config['CELERY_BROKER_URL'] = "redis://localhost:6379/0"
 app.config['result_backend'] = "redis://localhost:6379/0"
@@ -125,6 +126,21 @@ def get_pdf():
             as_attachment=True,
             attachment_filename=output_filename)
             #attachment_filename=filename)
+
+    except FileNotFoundError:
+        abort(404)
+
+@app.route("/sample-targets", methods=['GET', 'POST'])
+def get_sample_bed():
+    sample_path = app.config["SAMPLE_TARGETS"]
+    sample_filename = os.path.basename(sample_path)
+
+    try:
+        return send_file(
+            sample_path,
+            as_attachment=True,
+            attachment_filename=sample_filename
+            )
 
     except FileNotFoundError:
         abort(404)
