@@ -1,7 +1,7 @@
 create database nanopore;
 create schema report;
 
-drop view if exists report.final_results
+drop view if exists report.final_results;
 drop view if exists report.targets_present;
 drop view if exists report.nanopore_report;
 drop table if exists report.unique_vcf_rows;

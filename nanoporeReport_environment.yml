@@ -161,8 +161,6 @@ dependencies:
   - pyyaml=5.3.1=py39h38d8fee_1
   - ratelimiter=1.2.0=py_1002
   - readline=8.0=he28a2e2_2
-  - redis=3.5.3=pypi_0
-  - redis-server=6.0.9=pypi_0
   - requests=2.25.0=pyhd3deb0d_0
   - rsa=4.6=pyh9f0ad1d_0
   - s3transfer=0.3.3=py39hde42818_2

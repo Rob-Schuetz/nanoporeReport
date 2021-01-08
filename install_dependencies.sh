@@ -11,7 +11,7 @@ else
     Miniconda3-latest-Linux-x86_64.sh
 fi
 
-export PATH=$PATH:~/miniconda3/bin/
+export PATH=$PATH:/home/ubuntu/miniconda3/bin/
 conda env create -n nanoporeReport -f nanoporeReport_environment.yml
 
 
@@ -23,7 +23,7 @@ else
     echo installing nodejs
     apt update
     apt install nodejs
-    apt install npmn
+    apt install npm
 fi
 
 # Install node dependencies.
@@ -39,23 +39,17 @@ rm Miniconda3-latest-Linux-x86_64.sh
 rm TIB_js-jrs-cp_7.8.0_linux_x86_64.run
 
 
+# Set up SQL tables
+bash /home/ubuntu/jasperserver/ctlscript.sh start
+cd /home/ubuntu/projects/nanoporeReport/build_report/scripts
+sudo -S -u postgres PGPASSWORD=postgres /home/ubuntu/jasperserver/postgresql/bin/createdb -p 5432 -h localhost -e nanopore
+sudo -S -u postgres PGPASSWORD=postgres /home/ubuntu/jasperserver/postgresql/bin/psql -U postgres -d nanopore -a -f make_tables.sql
+
 # Install ANNOVAR resources
-cd ~/projects/nanoporeReport/build_report/annovar
+cd /home/ubuntu/projects/nanoporeReport/build_report/annovar
 mkdir humandb && cd humandb
 wget http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz
-wget http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/hg19_cosmic68.txt.idx
-wget http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/hg19_cosmic68.txt
-wget http://www.openbioinformatics.org/annovar/download/hg19_cosmic68.txt
-annotate_variation.pl -buildver hg19 -downdb -webfrom annovar refGene humandb/
-
-# Set up SQL tables
-cd ~/projects/nanoporeReport/build_report/scripts
-export PATH=$PATH:$(pwd)
-createdb -p 5432 -h localhost -e nanopore
-psql -U postgres -d nanopore -a -f make_tables.sql
-
-
-
-
-
-
+# wget http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/hg19_cosmic68.txt.idx
+# wget http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/hg19_cosmic68.txt
+# wget http://www.openbioinformatics.org/annovar/download/hg19_cosmic68.txt
+# annotate_variation.pl -buildver hg19 -downdb -webfrom annovar refGene humandb/
