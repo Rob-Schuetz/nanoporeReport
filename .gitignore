@@ -48,6 +48,7 @@ yarn-error.log*
 # Snakemake
 /build_report/scripts/.snakemake
 /build_report/scripts/dag.svg
+/build_report/scripts/genomics/__pycache__/*
 
 # API logs
 /api/logs

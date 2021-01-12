@@ -1,3 +1,5 @@
+#!/bin/bash
+
 export PATH=$PATH:$(pwd)
 
 # Ensure Conda is installed
@@ -47,8 +49,8 @@ sudo -S -u postgres PGPASSWORD=postgres /home/ubuntu/jasperserver/postgresql/bin
 
 # Install ANNOVAR resources
 cd /home/ubuntu/projects/nanoporeReport/build_report/annovar
-mkdir humandb && cd humandb
-wget http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz
+mkdir humandb
+perl annotate_variation.pl -downdb -buildver hg19 refGene humandb
 # wget http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/hg19_cosmic68.txt.idx
 # wget http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/hg19_cosmic68.txt
 # wget http://www.openbioinformatics.org/annovar/download/hg19_cosmic68.txt

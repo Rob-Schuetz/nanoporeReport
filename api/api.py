@@ -38,6 +38,9 @@ def run_snakemake(self, my_id):
     command = ['bash', get_config.main("flaskAPI", "sub_command")]
     os.chdir(os.path.dirname(get_config.main("flaskAPI", "sub_command")))
 
+    if not os.path.exists(get_config.main("flaskAPI", "log_dir")):
+        os.mkdir(get_config.main("flaskAPI", "log_dir"))
+
     with open(os.path.join(get_config.main("flaskAPI", "log_dir"), my_id + '.txt'), 'w') as f:
         process = subprocess.run(command, stderr=f)
 

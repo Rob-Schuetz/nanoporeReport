@@ -75,9 +75,8 @@ rule get_annotations:  #Replace with snpeff, vcfanno
         "-buildver {params.build} "
         "--out {params.out} "
         "-remove "
-        "-protocol refGene,cosmic68 "
-        "-operation g,f "
-        "-nastring . "
+        "-protocol refGene "
+        "-operation g "
         "-nastring . > /dev/null 2>&1"
 
 
