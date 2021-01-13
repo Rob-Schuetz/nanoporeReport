@@ -6,14 +6,15 @@ use Getopt::Long;
 use File::Basename;
 use File::Spec;
 
-our $REVISION = '$Revision: 11f4bb33cd1289ba7c43dadc20b3e9982b5a9a00 $';
-our $DATE =	'$Date: 2016-02-01 00:11:18 -0800 (Mon,  1 Feb 2016) $';  
-our $AUTHOR =	'$Author: Kai Wang <kai@openbioinformatics.org> $';
+our $REVISION = '$Revision: c66762679205bdc00c64e465ac6ccd8f62132e2f $';
+our $DATE =	'$Date: 2020-06-08 00:46:07 -0400 (Mon,  8 Jun 2020) $';
+our $AUTHOR =	'$Author: Kai Wang <kaichop@gmail.com> $';
 
 our ($verbose, $help, $man);
 our ($queryfile, $dbloc);
-our ($outfile, $buildver, $remove, $checkfile, $protocol, $operation, $otherinfo, $onetranscript, $nastring, $genericdbfile, $gff3dbfile, $bedfile, $vcfdbfile, $csvout, $argument, $tempdir, $vcfinput, $dot2underline, $thread, $maxgenethread);
+our ($outfile, $buildver, $remove, $checkfile, $protocol, $operation, $otherinfo, $onetranscript, $nastring, $genericdbfile, $gff3dbfile, $bedfile, $vcfdbfile, $csvout, $argument, $tempdir, $vcfinput, $dot2underline, $thread, $maxgenethread, $polishgene, $xreffile, $convertarg, $codingarg, $intronhgvs);
 our $orig_command = $0;
+our $SC_PREFIX = '';			#to make the program more compatible in Windows (when Windows does not set up Perl as the handler for *.pl automatically)
 
 for my $i (0 .. @ARGV-1) {
 	my $temp = $ARGV[$i];
@@ -25,12 +26,13 @@ for my $i (0 .. @ARGV-1) {
 	#print STDERR "orig_command = $orig_command\n";
 }
 
-GetOptions('verbose|v'=>\$verbose, 'help|h'=>\$help, 'man|m'=>\$man, 'outfile=s'=>\$outfile, 'buildver=s'=>\$buildver, 'remove'=>\$remove, 'checkfile!'=>\$checkfile, 
+GetOptions('verbose|v'=>\$verbose, 'help|h'=>\$help, 'man|m'=>\$man, 'outfile=s'=>\$outfile, 'buildver=s'=>\$buildver, 'remove'=>\$remove, 'checkfile!'=>\$checkfile,
 	'protocol=s'=>\$protocol, 'operation=s'=>\$operation, 'otherinfo'=>\$otherinfo, 'onetranscript'=>\$onetranscript, 'nastring=s'=>\$nastring,
 	'genericdbfile=s'=>\$genericdbfile, 'gff3dbfile=s'=>\$gff3dbfile, 'bedfile=s'=>\$bedfile, 'vcfdbfile=s'=>\$vcfdbfile,
 	'csvout'=>\$csvout, 'argument=s'=>\$argument, 'tempdir=s'=>\$tempdir, 'vcfinput'=>\$vcfinput, 'dot2underline'=>\$dot2underline,
-	'thread=i'=>\$thread, 'maxgenethread=i'=>\$maxgenethread) or pod2usage ();
-	
+	'thread=i'=>\$thread, 'maxgenethread=i'=>\$maxgenethread, 'polishgene!'=>\$polishgene, 'xreffile=s'=>\$xreffile, 'convertarg=s'=>\$convertarg, 'codingarg=s'=>\$codingarg,
+	'intronhgvs=i'=>\$intronhgvs) or pod2usage ();
+
 $help and pod2usage (-verbose=>1, -exitval=>1, -output=>\*STDOUT);
 $man and pod2usage (-verbose=>2, -exitval=>1, -output=>\*STDOUT);
 @ARGV or pod2usage (-verbose=>0, -exitval=>1, -output=>\*STDOUT);
@@ -61,10 +63,11 @@ $checkfile and checkFileExistence (@dbtype1);
 if ($vcfinput) {
 	my $sc;
 	$csvout and pod2usage ("Error in argument: -csvout is not compatible with -vcfinput");
-	$sc = "convert2annovar.pl -includeinfo -allsample -withfreq -format vcf4 $queryfile > $tempfile.avinput";
+	$convertarg ||= '';
+	$sc = $SC_PREFIX . "convert2annovar.pl $convertarg -includeinfo -allsample -withfreq -format vcf4 $queryfile > $tempfile.avinput";
 	print STDERR "\nNOTICE: Running with system command <$sc>\n";
 	system ($sc) and die "Error running system command: <$sc>\n";
-	$sc = $orig_command;
+	$sc = $SC_PREFIX . $orig_command;
 	$sc =~ s/\s$queryfile\s/ $tempfile.avinput /;		#change command line argument
 	$sc =~ s/\s-?-vcfi\w*//;				#delete -vcfinput argument
 	$sc .= ' -otherinfo';					#add -otherinfo so that VCF information is included in output file
@@ -82,15 +85,18 @@ if ($vcfinput) {
 	for my $i (0 .. @protocol-1) {
 		print STDERR "-----------------------------------------------------------------\n";
 		print STDERR "NOTICE: Processing operation=$operation[$i] protocol=$protocol[$i]\n";
-		if ($operation[$i] eq 'g') {
-			geneOperation ($protocol[$i], $dbtype1[$i], $argument[$i]||undef);
+		if ($operation[$i] eq 'g' or $operation[$i] eq 'gx') {
+			if ($operation[$i] eq 'gx' and not defined $xreffile) {
+				print STDERR "WARNING: the 'g' rather than 'gx' operation will used due to lack of -xreffile argument\n";
+			}
+			geneOperation ($protocol[$i], $dbtype1[$i], $argument[$i], $operation[$i]||undef);		#changed 20190725 (previously gx operation is not specifically indicating which gene based annotation to use the -xreffile)
 		} elsif ($operation[$i] eq 'r') {
 			regionOperation ($protocol[$i], $dbtype1[$i], $argument[$i]||undef);
 		} elsif ($operation[$i] eq 'f') {
 			filterOperation ($protocol[$i], $dbtype1[$i], $argument[$i]||undef);
 		}
 	}
-	
+
 	printOrigOutput ();
 }
 
@@ -110,13 +116,14 @@ sub backConvertVCF {
 	print STDERR "NOTICE: Reading from $multiannofile\n";
 	$_ = <MANNO>;
 	s/[\r\n]+$//;
+	s/Otherinfo1.+/Otherinfo/;		#20191010: now that we chagned "Otherinfo" to "Otherinfo1 Otherinfo2 Otherinfo3" etc, to keep the program working, we have to do some trick here to only keep the first Otherinfo
 	my @name = split (/\t/, $_);
-	$name[$#name] eq 'Otherinfo' or die "Error: the last column in header row should be 'Otherinfo'\n";
-	
+	$name[$#name] =~ m/^Otherinfo/ or die "Error: the last column in header row should start with 'Otherinfo'\n";
+
 	my @nextrecord;
 	my (@field, @prefield);
 	my ($anno_string, $pre_anno_string);
-	
+
 	open (OUT, ">$outfile.${buildver}_multianno.vcf") or die "Error: cannot write to output file $outfile.${buildver}_multianno.vcf\n";
 	print STDERR "-----------------------------------------------------------------\n";
 	print STDERR "NOTICE: VCF output is written to $outfile.${buildver}_multianno.vcf\n";
@@ -138,9 +145,9 @@ sub backConvertVCF {
 			for my $i (0 .. @name-1) {
 				if ($name[$i] =~ m/^(Chr|Start|End|Ref|Alt)$/) {
 					1;					#these are annovar input and are not in INFO field when printed out
-				} elsif ($name[$i] =~ m/^(1000g\d+|esp\d+|cg\d+|popfreq|nci\d+)/) {
+				} elsif ($name[$i] =~ m/^(1000g\d+|esp\d+|cg\d+|popfreq|nci\d+|ExAC|gnomAD)/) {
 					print OUT qq{##INFO=<ID=$name[$i],Number=1,Type=Float,Description="$name[$i] annotation provided by ANNOVAR">\n};
-				} elsif ($name[$i] eq 'Otherinfo') {		#this is the field that stores VCF information, and will not be in the annotation in INFO field
+				} elsif ($name[$i] =~ m/^Otherinfo/) {		#this is the field that stores VCF information, and will not be in the annotation in INFO field
 					1;
 				} else {
 					print OUT qq{##INFO=<ID=$name[$i],Number=.,Type=String,Description="$name[$i] annotation provided by ANNOVAR">\n};
@@ -156,14 +163,17 @@ sub backConvertVCF {
 		}
 	}
 	close (IN);
-	
+
 	while (<MANNO>) {
 		s/[\r\n]+$//;
 		my $anno_string;
 		@field = split (/\t/, $_);
-		
-		$DATE =~ m/Date: (\d+\-\d+\-\d+)/;
-		$anno_string = ";ANNOVAR_DATE=$1";
+
+		if ($DATE =~ m/Date: (\d+\-\d+\-\d+)/) {
+			$anno_string = ";ANNOVAR_DATE=$1";
+		} else {
+			$anno_string = ";ANNOVAR_DATE=UNKNOWN";
+		}
 		for my $i (5 .. @name-2) {		#these are all the annotation columns (starting from 6th column to the last one, which is Otherinfo which will not be written)
 			$field[$i] =~ s/\s/_/g;		#convert 'nonsynonymous SNV' to 'nonsynonymous' as space is not allowed in VCF INFO field, yet _ is easier to view for users
 			$field[$i] =~ s/;/\\x3b/g;	#; is not allowed in VCF INFO field
@@ -171,16 +181,18 @@ sub backConvertVCF {
 			$anno_string .= ";$name[$i]=$field[$i]";	#the 8th column in Otherinfo is INFO column (plus the freq, quality, dp column)
 		}
 		$anno_string .= ";ALLELE_END";
-		
+
+		defined $field[@name+3] or die "field not defined for @name";
+		@prefield and (defined $prefield[$#field] or die "prefield not defined (@prefield) with field=" . scalar(@field) . " and prefield=" . scalar(@prefield));
 		if (@prefield and join ("\t", @field[@name+3 .. $#field]) eq join ("\t", @prefield[@name+3 .. $#field])) {		#same locus, multiple alternative allele
 			$pre_anno_string .= $anno_string;
-			
+
 		} else {
 			if (@prefield) {
 				$prefield[@name+9] .= $pre_anno_string;		#update INFO field
 				print OUT join ("\t", @prefield[@name+2 .. $#prefield]), "\n";
 			}
-				
+
 			@prefield = @field;
 			$pre_anno_string = $anno_string;
 		}
@@ -200,7 +212,7 @@ sub printOrigOutput {
 	open OUT,">",$final_out or die "Cannot write to $final_out: $!\n";
 	print STDERR "-----------------------------------------------------------------\n";
 	print STDERR "NOTICE: Multianno output file is written to $final_out\n";
-	
+
 	my @expanded_header;
 
 	for my $item (@header) {
@@ -210,13 +222,14 @@ sub printOrigOutput {
 			push @expanded_header, $item;
 		}
 	}
-	
-	if ($csvout) {
-		print OUT join(",", qw/Chr Start End Ref Alt/, @expanded_header), $otherinfo?",Otherinfo":"", "\n";
-	} else {
-		print OUT join("\t", qw/Chr Start End Ref Alt/, @expanded_header), $otherinfo?"\tOtherinfo":"", "\n";
-	}
-	
+
+	#if ($csvout) {
+	#	print OUT join(",", qw/Chr Start End Ref Alt/, @expanded_header), $otherinfo?",Otherinfo":"", "\n";
+	#} else {
+	#	print OUT join("\t", qw/Chr Start End Ref Alt/, @expanded_header), $otherinfo?"\tOtherinfo":"", "\n";
+	#}
+
+	my $linecount = 0;
 	open (FH, $queryfile) or die "Error: cannot read from inputfile $queryfile: $!\n";
 	while (<FH>) {
 		s/[\r\n]+$//;
@@ -224,24 +237,42 @@ sub printOrigOutput {
 		my ($varstring, $info) = ($1, $2);
 		my @varstring = split (/\s+/, $varstring);
 		$varstring =~ s/\s+/\t/g;
-		
+
+		if ($linecount == 0) {		#based on the first line, print out Otherinfo, Otherinfo2, Otherinfo3, etc
+			$linecount++;
+			my $num_info = $info =~ tr/\t/\t/+1;
+			if ($csvout) {
+				if ($otherinfo) {
+					print OUT join(",", qw/Chr Start End Ref Alt/, @expanded_header);
+					for my $i (1 .. $num_info) {
+						print OUT ",Otherinfo$i";
+					}
+					print OUT "\n";
+				} else {
+					print OUT join(",", qw/Chr Start End Ref Alt/, @expanded_header), "\n";
+				}
+			} else {
+				if ($otherinfo) {
+					print OUT join("\t", qw/Chr Start End Ref Alt/, @expanded_header);
+					for my $i (1 .. $num_info) {
+						print OUT "\tOtherinfo$i";
+					}
+					print OUT "\n";
+				} else {
+					print OUT join("\t", qw/Chr Start End Ref Alt/, @expanded_header), "\n";
+				}
+			}
+		}
+
 		my @oneline;
 		for my $i (0 .. @header-1) {
 			my $item = $header[$i];
 			my $expanded_field;
 
-			if ($dot2underline) {
-				$item =~ s/Func_/Func./;
-				$item =~ s/Gene_/Gene./;
-				$item =~ s/GeneDetail_/GeneDetail./;
-				$item =~ s/ExonicFunc_/ExonicFunc./;
-				$item =~ s/AAChange_/AAChange./;
-			}
-			
 			if ( exists $annotation_headers{$item} ) {
 				$expanded_field = scalar @{ $annotation_headers{$item} };
 			}
-			
+
 			if ($csvout) {
 				if ($expanded_field) {
 					push @oneline,($varanno{$varstring}{$item} || join (",", ($nastring) x $expanded_field));	#value is already comma-delimited
@@ -295,22 +326,22 @@ sub processArgument {
 	} else {
 		$tempfile = $outfile;
 	}
-        	
+
 	if (not defined $buildver) {
 		$buildver = 'hg18';
 		print STDERR "NOTICE: the --buildver argument is set as 'hg18' by default\n";
 	}
-	
+
 	not defined $checkfile and $checkfile = 1;
-	
-	
+
+
 	if ($vcfinput) {
 		defined $nastring and $nastring ne '.' and pod2usage ("Error in argument: -nastring must be '.' when '-vcfinput' is specified");
 		$nastring = '.';		#force "." to denote missing data. "." can be recognized as NA in other tools such as R
 	} else {
 		defined $nastring or $nastring = '';
 	}
-	
+
 	if (not $protocol) {
 		$operation and pod2usage ("Error in argument: you must specify --protocol if you specify --operation");
 		if ($buildver eq 'hg18') {
@@ -325,21 +356,23 @@ sub processArgument {
 			pod2usage ("Error in argument: please specify --protocol argument for the --buildver $buildver");
 		}
 	}
-	
+
 	if ($protocol =~ m/\bgeneric\b/) {
 		$genericdbfile or pod2usage ("Error in argument: please specify -genericdbfile argument when 'generic' operation is specified");
 	}
-	
+
 	#additional preparation work
 	@protocol = split (/,/, $protocol);
 	@operation = split (/,/, $operation);
 	@argument = split (/,/, $argument||'', -1);
-	@protocol == @operation or pod2usage ("Error in argument: different number of elements are specified in --protocol and --operation argument");
-	@argument and @protocol == @argument || pod2usage ("Error in argument: different number of elements are specified in --protocol and --argument argument");
+	@protocol == @operation or pod2usage ("Error in argument: different number of elements are specified in --protocol (${\(scalar @protocol)}) and --operation (${\(scalar @operation)}) argument");
+	@argument and @protocol == @argument || pod2usage ("Error in argument: different number of elements are specified in --protocol (${\(scalar @protocol)}) and --argument (${\(scalar @argument)}) argument");
 	for my $op (@operation) {
 		$op =~ m/^g|r|f$/ or pod2usage ("Error in argument: the --operation argument must be comma-separated list of 'g', 'r', 'f'");
 	}
-		
+
+	map {s/&/,/g} @argument; 	#if there is comma in argument, the user need to specify & instead (--argument  '','-minqueryfrac 0.8 --colsWanted 2&3&21')
+
 	my %uniq_protocol;
 	for (@protocol) {
 		$uniq_protocol{$_}++;
@@ -369,83 +402,200 @@ sub processArgument {
 		$thread > 0 or pod2usage ("Error: the --thread argument must be a positive integer");
 	}
 
+	if (defined $intronhgvs) {
+		$intronhgvs > 2 or pod2usage ("Error: the --intronhgvs argument must be an integer greater than 2");
+	}
+
+	if (not defined $polishgene) {
+		$polishgene = 1;
+		print STDERR "NOTICE: the --polish argument is set ON automatically (use --nopolish to change this behavior)\n";
+	}
+
 	#prepare PATH environmental variable
 	my $path = File::Basename::dirname ($0);
 	$path and $ENV{PATH} = "$path:$ENV{PATH}";		#set up the system executable path to include the path where this program is located in
+	if ($^O eq 'MSWin32') {
+		$SC_PREFIX = "perl $path/";
+		$verbose and print STDERR "WARNING: sc_prefix=<$SC_PREFIX>\n";
+	}
 }
 
 # Call ANNOVAR for gene annotations
 sub geneOperation {
-	my ($protocol, $dbtype1, $argument) = @_;
+	my ($protocol, $dbtype1, $argument, $operation) = @_;		#changed 20190725
+
+	my %genetype = ('gene'=>'refGene', 'refgene'=>'refGene', 'knowngene'=>'knownGene', 'ensgene'=>'ensGene');
+	$genetype{$protocol} and $protocol = $genetype{$protocol};	#sometimes a user may use 'gene' or 'refgene'. this can be handled by annotate_variation, but not by coding_change, so we explicitely change it here
+
 	#generate gene anno
 	my $sc;
-	$sc = "annotate_variation.pl -geneanno -buildver $buildver -dbtype $protocol -outfile $tempfile.$protocol -exonsort $queryfile $dbloc";
+	$sc = $SC_PREFIX . "annotate_variation.pl -geneanno -buildver $buildver -dbtype $protocol -outfile $tempfile.$protocol -exonsort -nofirstcodondel $queryfile $dbloc";		#20191010: add -nofirstcodondel
 	$argument and $sc .= " $argument";
-	
+	$intronhgvs and $sc .= " -splicing_threshold $intronhgvs";
+
 	if ($thread) {
 		$sc .= " -thread $thread";
 	}
 	if ($maxgenethread) {
 		$sc .= " -maxgenethread $maxgenethread";
 	}
-	
+
 	print STDERR "\nNOTICE: Running with system command <$sc>\n";
 	system ($sc) and die "Error running system command: <$sc>\n";
-	
+
 	#read in gene anno
 	my $anno_outfile="$tempfile.$protocol.variant_function";
 	my $e_anno_outfile="$tempfile.$protocol.exonic_variant_function";
-	
-	open (FUNCTION, "<",$anno_outfile) or die "Error: cannot read from $anno_outfile: $!\n";	
+
+	if ($polishgene) {
+		if (rename ($e_anno_outfile, "$e_anno_outfile.orig")) {
+			$codingarg ||= '';
+			$sc = $SC_PREFIX . "coding_change.pl $codingarg $e_anno_outfile.orig $dbloc/${buildver}_$protocol.txt $dbloc/${buildver}_${protocol}Mrna.fa -alltranscript -out $tempfile.$protocol.fa -newevf $e_anno_outfile";
+			print STDERR "\nNOTICE: Running with system command <$sc>\n";
+			system ($sc) and die "Error running system command: <$sc>\n";
+			push @unlink, "$tempfile.$protocol.fa", "$e_anno_outfile.orig";
+		} else {
+			warn ("WARNING: file $e_anno_outfile cannot be renamed; polishment of gene annotation cannot continue\n");
+		}
+	}
+
+	open (FUNCTION, "<",$anno_outfile) or die "Error: cannot read from $anno_outfile: $!\n";
 	open (EFUNCTION,"<",$e_anno_outfile) or die "Error: cannot read from $e_anno_outfile: $!\n";
-	
+
 	if ($dot2underline) {
 		push @header,"Func_$protocol", "Gene_$protocol", "GeneDetail_$protocol", "ExonicFunc_$protocol", "AAChange_$protocol"; #header
+		#$xreffile and push @header, "Xref_$protocol";
 	} else {
 		push @header,"Func.$protocol", "Gene.$protocol", "GeneDetail.$protocol", "ExonicFunc.$protocol", "AAChange.$protocol"; #header
+		#$xreffile and push @header, "Xref.$protocol";
 	}
-	
-	while (<FUNCTION>) 
+
+	my (%xref, @xrefkey, $xrefkey, $foundheader);
+	if ($xreffile and $operation eq 'gx') {			#changed 20190725 (add "and $operation eq 'gx'")
+		my $countline = 0;
+		open (XREF, $xreffile) or die "Error: cannot read from xreffile $xreffile: $!\n";
+		while (<XREF>) {
+			s/[\r\n]+$//;
+			if (not $countline) {
+				if (m/^#(.+)/) {
+					@xrefkey = split (/\t/, $1);
+					shift @xrefkey;		#the first field is supposed to be gene name so we remove it.
+					print STDERR "NOTICE: The xrefkey is provided in header as <@xrefkey>\n";
+					$foundheader++;
+				} else {
+					@xrefkey = ('Xref');
+					print STDERR "NOTICE: The xrefkey is set as Xref due to lack of header line in xreffile\n";
+				}
+				if ($dot2underline) {
+					push @header, map {$_ . '_' . $protocol} @xrefkey;
+				} else {
+					push @header, map {"$_.$protocol"} @xrefkey;
+				}
+			}
+			#m/^(\S+)\t(.+)/ or next;
+			my ($name, @info) = split (/\t/, $_);
+			@info or next;		#this line does not contain any xref information
+			for my $i (0 .. @xrefkey-1) {
+				$xref{$name, $xrefkey[$i]} = $info[$i] || '';
+			}
+			#$xref{$1} = $2;
+			$countline++;
+		}
+		close (XREF);
+		print STDERR "NOTICE: Finished reading ", scalar (keys %xref), " cross references (each with ${\(scalar @xrefkey)} fields) from $xreffile\n";
+	}
+
+	while (<FUNCTION>)
 	{
 		s/[\r\n]+$//;
-		m/^([^\t]+)\t([^\t]+)\t(\S+\s+\S+\s+\S+\s+\S+\s+\S+).*/ or die "Error: invalid record found in annovar outputfile: <$_>\n";
+		m/^([^\t]+)\t([^\t]+)\t(\S+\s+\S+\s+\S+\s+\S+\s+\S+).*/ or die "Error: invalid record found in annovar outputfile: <$_>\n";		#example: splicing        KLK12(NM_019598:exon4:c.457+6T>C,NM_145894:exon4:c.457+6T>C,NM_001370125:exon4:c.457+6T>C)
 		my ($function, $gene, $varstring) = ($1, $2, $3);
-		my @spliceanno;
+		my $spliceanno = '';
 		$varstring =~ s/\s+/\t/g;
-		#$varanno{$varstring}{"Func.$protocol"}=$function;	#changed to below to handle -arg '-separate' when users want to see output from -separate argument 20140711
-		$varanno{$varstring}{"Func.$protocol"}=exists $varanno{$varstring}{"Func.$protocol"} ? $varanno{$varstring}{"Func.$protocol"} . ";$function" : $function;
-		
-		while ($gene =~ m/\((.+?)\)/g) {
-			$gene =~ s/\((.+?)\)//;
-			push @spliceanno, $1;
+		while ($gene =~ m/\(([^)]+)\)/g) {
+			$spliceanno .= "$1;";
 		}
-		$varanno{$varstring}{"Gene.$protocol"} = $gene;
-		$varanno{$varstring}{"GeneDetail.$protocol"} = join (";", @spliceanno) || $nastring;
+		chop $spliceanno if $gene =~ s/\(([^)]+)\)//g;
+		$spliceanno =~ tr/,/;/;
+		$gene =~ tr/,/;/;
+
+		#if -intronhgvs is set, we need to convert these splicing annotations back to intron annotations
+		if ($intronhgvs) {
+			my $min_distance = 0;		#minimum distance in splicing annotation (if <=2, then it is real splicing variants)
+			while ($spliceanno =~ m/[\+\-](\d+)/g) {
+				$min_distance ||= $1;
+				$min_distance < $1 and $min_distance = $1;
+			}
+			if ($min_distance > 2) {
+				$function = 'intron';
+			}
+		}
+
+
+		#my %typehash = ("Func" => $function, "Gene" => $gene, "GeneDetail" => $spliceanno);
+		#$xreffile and $typehash{$xrefkey} = $xref{$gene};
+
+		my @typearray = (["Func", $function], ["Gene", $gene], ["GeneDetail", $spliceanno]);
+		if ($xreffile) {
+			for my $i (0 .. @xrefkey-1) {
+				push @typearray, [$xrefkey[$i], $xref{$gene, $xrefkey[$i]}];
+			}
+		}
+
+		#while (my($type, $typeanno) = each %typehash) {
+		#	if ($typeanno) {
+		for my $i (0 .. @typearray-1) {
+			my ($type, $typeanno) = @{$typearray[$i]};
+			if ($typeanno) {
+				my $typeprotocol = $dot2underline ? $type.'_'.$protocol : "$type.$protocol";
+				if ( exists $varanno{$varstring}{$typeprotocol} ) {
+					my $quoted_typeanno = quotemeta ($typeanno);			#change something like 'Na(+)' to 'Na\(\+\)'
+					if ($varanno{$varstring}{$typeprotocol} !~ /(^|;)$quoted_typeanno(;|$)/) {
+						$varanno{$varstring}{$typeprotocol} .= ";$typeanno";
+					}
+				} else {
+					$varanno{$varstring}{$typeprotocol} = $typeanno;
+				}
+			}
+		}
+		# changed to below to handle -arg '-separate' when users want to see output from -separate argument 20160419
+		# $varanno{$varstring}{"Func.$protocol"} = $function; # 20140711
+		# $varanno{$varstring}{"Func.$protocol"} = exists $varanno{$varstring}{"Func.$protocol"} ? $varanno{$varstring}{"Func.$protocol"} . ";$function" : $function; # 20160419
+		# $varanno{$varstring}{"Gene.$protocol"} = $gene; # 20160419
+		# $varanno{$varstring}{"GeneDetail.$protocol"} = join (";", @spliceanno) || $nastring; # 20160419
 	}
 	close FUNCTION;
 	while (<EFUNCTION>)
 	{
 		m/^line\d+\t([^\t]+)\t(\S+)\t(\S+\s+\S+\s+\S+\s+\S+\s+\S+)/ or die "Error: invalid record found in annovar outputfile 2: <$_>\n";
 		my ($efunc, $aachange, $varstring) = ($1, $2, $3);
-		
-		$aachange =~ s/,$//;	#delete the trailing comma
-		
 		$varstring =~ s/\s+/\t/g;
-		my @aachange = split (/:|,/, $aachange);
-
-		#$varanno{$varstring}{"ExonicFunc.$protocol"}=$efunc;	#changed to below to handle -arg '-separate' when users want to see output from -separate argument 20140711
-		$varanno{$varstring}{"ExonicFunc.$protocol"}=exists $varanno{$varstring}{"ExonicFunc.$protocol"} ? $varanno{$varstring}{"ExonicFunc.$protocol"} . ";$efunc" : $efunc;
-		if (not $onetranscript) {
-			#$varanno{$varstring}{"AAChange.$protocol"}=$aachange;	#changed to below to handle -arg '-separate' when users want to see output from -separate argument 20140711
-			$varanno{$varstring}{"AAChange.$protocol"}=exists $varanno{$varstring}{"AAChange.$protocol"} ? $varanno{$varstring}{"AAChange.$protocol"} . ";$aachange" : $aachange;
+		if ($onetranscript) {
+			$aachange =~ s/,.+//; # only output aachange in first transcript
 		} else {
-			if (@aachange >= 5) 
-			{
-			    $varanno{$varstring}{"AAChange.$protocol"}="$aachange[1]:$aachange[3]:$aachange[4]"; #only output aachange in first transcript
-			} else {
-			    $varanno{$varstring}{"AAChange.$protocol"}=$aachange;		#aachange could be "UNKNOWN"
+			$aachange =~ s/,$//; # delete the trailing comma
+			#$aachange =~ tr/,/;/;	#I commented it out 20170608 since it is not necessary and caused confusions for some people
+		}
+		#my %typehash = ("ExonicFunc" => $efunc, "AAChange" => $aachange);
+		my @typearray = (["ExonicFunc", $efunc], ["AAChange", $aachange]);
+		#while (my($type, $typeanno) = each %typehash) {
+		for my $i (0 .. @typearray-1) {
+			my ($type, $typeanno) = @{$typearray[$i]};
+			if ($typeanno) {
+				my $typeprotocol = $dot2underline ? $type.'_'.$protocol : "$type.$protocol";
+				if ( exists $varanno{$varstring}{$typeprotocol} ) {
+					next if $onetranscript and $type eq "AAChange";
+					if ($varanno{$varstring}{$typeprotocol} !~ /(^|;)$typeanno(;|$)/) {
+						$varanno{$varstring}{$typeprotocol} .= ";$typeanno";
+					}
+				} else {
+					$varanno{$varstring}{$typeprotocol} = $typeanno;
+				}
 			}
 		}
+		# changed to below to handle -arg '-separate' when users want to see output from -separate argument 20160419
+		# $varanno{$varstring}{"ExonicFunc.$protocol"} = $efunc; # 20140711
+		# $varanno{$varstring}{"AAChange.$protocol"} = $aachange; # 20140711
 	}
 	close EFUNCTION;
 	push @unlink, $anno_outfile, $e_anno_outfile, "$tempfile.$protocol.log";
@@ -455,13 +605,13 @@ sub geneOperation {
 sub regionOperation {
 	my ($dbtype, $dbtype1, $argument) = @_;
 	my ($userfile, $header);
-	my $sc = "annotate_variation.pl -regionanno -dbtype $dbtype -buildver $buildver -outfile $tempfile $queryfile $dbloc";
+	my $sc = $SC_PREFIX . "annotate_variation.pl -regionanno -dbtype $dbtype -buildver $buildver -outfile $tempfile $queryfile $dbloc";
 	$argument and $sc .= " $argument";
-	
+
 	if ($thread) {
 		$sc .= " -thread $thread";
 	}
-	
+
 	if ($dbtype eq 'bed') {
 		$userfile = shift @bedfile1;
 		$sc .= " -bedfile $userfile";
@@ -469,7 +619,7 @@ sub regionOperation {
 		$userfile = shift @gff3dbfile1;
 		$sc .= " -gff3dbfile $userfile";
 	}
-	
+
 	print STDERR "\nNOTICE: Running with system command <$sc>\n";
 	system ($sc) and die "Error running system command: <$sc>\n";
 
@@ -489,9 +639,9 @@ sub regionOperation {
 		$header = $dbtype;
 	}
 	push @header,$header;
-	
+
 	open (FH, "$tempfile.${buildver}_$dbtype1") or die "Error: cannot open file\n";
-	while (<FH>) 
+	while (<FH>)
 	{
 		m/^([^\t]+)\t([^\t]+)\t(\S+\s+\S+\s+\S+\s+\S+\s+\S+).*/ or die "Error: invalid record found in annovar outputfile: <$_>\n";
 		my ($db,$anno,$varstring)=($1,$2,$3);
@@ -500,7 +650,7 @@ sub regionOperation {
 		$varanno{$varstring}{$header}=$anno;
 	}
 	close (FH);
-	
+
 	push @unlink, "$tempfile.${buildver}_$dbtype1", "$tempfile.log";
 }
 
@@ -508,12 +658,12 @@ sub regionOperation {
 sub filterOperation {
 	my ($dbtype, $dbtype1, $argument) = @_;
 	my ($userfile, $header);
-	my $sc = "annotate_variation.pl -filter -dbtype $dbtype -buildver $buildver -outfile $tempfile $queryfile $dbloc";
+	my $sc = $SC_PREFIX . "annotate_variation.pl -filter -dbtype $dbtype -buildver $buildver -outfile $tempfile $queryfile $dbloc";
 	$argument and $sc .= " $argument";
 	if ($thread) {
 		$sc .= " -thread $thread";
 	}
-	
+
 	if ($dbtype eq 'generic') {
 		$userfile = shift @genericdbfile1;
 		$sc .= " -genericdbfile $userfile";
@@ -542,7 +692,7 @@ sub filterOperation {
 	if ($dbtype eq 'avsift') {
 		$sc .= " -sift_threshold 0";		#for historical reasons (as the -sift_threshold 0.05 was added automatically for avsift historically)
 	}
-	
+
 	print STDERR "\nNOTICE: Running system command <$sc>\n";
 	system ($sc) and die "Error running system command: <$sc>\n";
 
@@ -562,9 +712,9 @@ sub filterOperation {
 		$header = $dbtype;
 	}
 	push @header,$header;
-	
+
 	open (FH, "$tempfile.${buildver}_${dbtype1}_dropped") or die "Error: cannot open file\n";
-	while (<FH>) 
+	while (<FH>)
 	{
 		m/^([^\t]+)\t([^\t]+)\t(\S+\s+\S+\s+\S+\s+\S+\s+\S+).*/ or die "Error: invalid record found in annovar outputfile: <$_>\n";
 		my ($db,$anno,$varstring)=($1,$2,$3);
@@ -574,7 +724,7 @@ sub filterOperation {
 		$varanno{$varstring}{$header}=$anno;
 	}
 	close (FH);
-	
+
 	push @unlink, "$tempfile.${buildver}_${dbtype1}_dropped", "$tempfile.${buildver}_${dbtype1}_filtered", "$tempfile.log";
 }
 
@@ -583,31 +733,31 @@ sub proxyDBType {
 	my @db_names = @_;
 
 	my %dbalias=(					#for backward compatibility (historical reasons)
-		'gene'=>'refGene', 
-		'refgene'=>'refGene', 
-		'knowngene'=>'knownGene', 
-		'ensgene'=>'ensGene', 
-		'band'=>'cytoBand', 
-		'cytoband'=>'cytoBand', 
-		'tfbs'=>'tfbsConsSites', 
+		'gene'=>'refGene',
+		'refgene'=>'refGene',
+		'knowngene'=>'knownGene',
+		'ensgene'=>'ensGene',
+		'band'=>'cytoBand',
+		'cytoband'=>'cytoBand',
+		'tfbs'=>'tfbsConsSites',
 		'mirna'=>'wgRna',
-		'mirnatarget'=>'targetScanS', 
-		'segdup'=>'genomicSuperDups', 
-		'omimgene'=>'omimGene', 
+		'mirnatarget'=>'targetScanS',
+		'segdup'=>'genomicSuperDups',
+		'omimgene'=>'omimGene',
 		'gwascatalog'=>'gwasCatalog',
-		'1000g_ceu'=>'CEU.sites.2009_04', 
-		'1000g_yri'=>'YRI.sites.2009_04', 
+		'1000g_ceu'=>'CEU.sites.2009_04',
+		'1000g_yri'=>'YRI.sites.2009_04',
 		'1000g_jptchb'=>'JPTCHB.sites.2009_04',
-		'1000g2010_ceu'=>'CEU.sites.2010_03', 
-		'1000g2010_yri'=>'YRI.sites.2010_03', 
+		'1000g2010_ceu'=>'CEU.sites.2010_03',
+		'1000g2010_yri'=>'YRI.sites.2010_03',
 		'1000g2010_jptchb'=>'JPTCHB.sites.2010_03',
-		'1000g2010jul_ceu'=>'CEU.sites.2010_07', 
-		'1000g2010jul_yri'=>'YRI.sites.2010_07', 
+		'1000g2010jul_ceu'=>'CEU.sites.2010_07',
+		'1000g2010jul_yri'=>'YRI.sites.2010_07',
 		'1000g2010jul_jptchb'=>'JPTCHB.sites.2010_07',
-		'1000g2010nov_all'=>'ALL.sites.2010_11', 
+		'1000g2010nov_all'=>'ALL.sites.2010_11',
 		'1000g2011may_all'=>'ALL.sites.2011_05'
 	);
-    
+
 	for (@db_names) {
 		$_ = $dbalias{$_} || $_;
 		if (m/^1000g(20\d\d)([a-z]{3})_([a-z]+)$/) {
@@ -623,7 +773,7 @@ sub proxyDBType {
 }
 
 # Check whether the database file is present (and issue error message if not)
-sub checkFileExistence {    
+sub checkFileExistence {
 	my @db_names = @_;
 	@genericdbfile1 = @genericdbfile;
 	@vcfdbfile1 = @vcfdbfile;
@@ -672,22 +822,27 @@ sub checkFileExistence {
             --onetranscript		print out only one transcript for exonic variants (default: all transcripts)
             --nastring <string>		string to display when a score is not available (default: null)
             --csvout			generate comma-delimited CSV file (default: tab-delimited txt file)
-            --argument <string>		comma-delimited strings as optional argument for each operation
+            --argument <string>		comma-delimited strings as optional argument for each operation (use & for comma inside string)
+            --convertarg <string>	argument to convert2annovar.pl
+            --codingarg <string>	argument to coding_change.pl
             --tempdir <dir>		directory to store temporary files (default: --outfile)
             --vcfinput			specify that input is in VCF format and output will be in VCF format
             --dot2underline		change dot in field name to underline (eg, Func.refGene to Func_refGene)
             --thread <int>		specify the number of threads to be used in annotation
             --maxgenethread <int>	specify the maximum number of threads allowed in gene annotation (default: 6)
-            
+            --polish			polish the protein notation for indels (such as p.G12Vfs*2)
+            --xreffile <file>		specify a cross-reference file for gene-based annotation
+            --intronhgvs <int>		print HGVS notations for intron within this threshold away from exon
+
 
  Function: automatically run a pipeline on a list of variants and summarize
  their functional effects in a comma-delimited file, or to an annotated VCF file
  if the original input is a VCF file
- 
- Example: table_annovar.pl example/ex1.avinput humandb/ -buildver hg19 -out myanno -remove -protocol refGene,cytoBand,dbnsfp30a -operation g,r,f -nastring . -csvout
-          table_annovar.pl example/ex2.vcf humandb/ -buildver hg19 -out myanno -remove -protocol refGene,cytoBand,esp6500siv2_all,1000g2015aug_all,1000g2015aug_afr,1000g2015aug_eas,1000g2015aug_eur,snp138,dbnsfp30a -operation g,r,f,f,f,f,f,f,f -nastring . -vcfinput
-                  
- Version: $Date: 2016-02-01 00:11:18 -0800 (Mon,  1 Feb 2016) $
+
+ Example: table_annovar.pl example/ex1.avinput humandb/ -buildver hg19 -out myanno -remove -protocol refGene,cytoBand,dbnsfp30a -operation g,r,f -nastring . -csvout -polish -xreffile example/gene_fullxref.txt
+          table_annovar.pl example/ex2.vcf humandb/ -buildver hg19 -out myanno -remove -protocol refGene,cytoBand,dbnsfp30a -operation g,r,f -nastring . -vcfinput
+
+ Version: $Date: 2020-06-08 00:46:07 -0400 (Mon,  8 Jun 2020) $
 
 =head1 OPTIONS
 
@@ -707,12 +862,12 @@ use verbose output.
 
 =item B<--protocol>
 
-comma-delimited string specifying annotation protocol. These strings typically 
+comma-delimited string specifying annotation protocol. These strings typically
 represent database names in ANNOVAR.
 
 =item B<--operation>
 
-comma-delimited string specifying type of operation. These strings can be g 
+comma-delimited string specifying type of operation. These strings can be g
 (gene), r (region) or f (filter).
 
 =item B<--outfile>
@@ -725,7 +880,7 @@ specify the genome build version
 
 =item B<--remove>
 
-remove all temporary files. By default, all temporary files will be kept for 
+remove all temporary files. By default, all temporary files will be kept for
 user inspection, but this will easily clutter the directory.
 
 =item B<--(no)checkfile>
@@ -754,17 +909,17 @@ delimited file names can be supplied.
 
 =item B<--otherinfo>
 
-print out otherinfo in the output file. "otherinfo" refers to all the 
+print out otherinfo in the output file. "otherinfo" refers to all the
 infomration after fifth column in the input queryfile.
 
 =item B<--onetranscript>
 
-print out only one random transcript for exonic variants. By default, all 
+print out only one random transcript for exonic variants. By default, all
 transcripts are printed in the output.
 
 =item B<--nastring>
 
-string to display when a score is not available. By default, empty string is 
+string to display when a score is not available. By default, empty string is
 printed in the output file.
 
 =item B<--csvout>
@@ -773,49 +928,76 @@ generate comma-delimited CSV file. By default, tab-delimited text file is genera
 
 =item B<--argument>
 
-a comma-separated list of arguments, to be supplied to each of the protocols. 
+a comma-separated list of arguments, to be supplied to each of the protocols.
 This list faciliates customized annotation procedure for each protocol.
+
+=item B<--convertarg>
+
+a string as argument to be supplied to the convert2annovar.pl program
+
+=item B<--codingarg>
+
+a string as argument to be supplied to the coding_change.pl program
 
 =item B<--tempdir>
 
-specify the directory location for storing temporary files used by 
-table_annovar. This argument is especially useful in a cluster computing 
-environment, so that temporary files are written to local disk of compute nodes, 
+specify the directory location for storing temporary files used by
+table_annovar. This argument is especially useful in a cluster computing
+environment, so that temporary files are written to local disk of compute nodes,
 yet results files are written to possibly remote hosts.
 
 =item B<--vcfinput>
 
-specify that input is in VCF format and output will be in VCF format. if you 
-want to generate a tab-delimited output or comma-delimited output file, you must 
+specify that input is in VCF format and output will be in VCF format. if you
+want to generate a tab-delimited output or comma-delimited output file, you must
 use convert2annovar to generate an ANNOVAR input file first.
 
 =item B<--dot2underline>
 
-change dot in field name to underline (eg, Func.refGene to Func_refGene), which 
-is useful for post-processing of the results in some software tools that cannot 
+change dot in field name to underline (eg, Func.refGene to Func_refGene), which
+is useful for post-processing of the results in some software tools that cannot
 handle dot in field names.
+
+=item B<--thread>
+
+specify the number of threads to be used in annotation (when multi-threading
+support is enabled in the system)
+
+=item B<--maxgenethread>
+
+specify the maximum number of threads allowed in gene annotation (default: 6)
+
+=item B<--polish>
+
+polish the protein notation for indels (such as p.G12Vfs*2) by re-calculating
+the protein sequence after a mutation is introduced in coding_change.pl
+
+=item B<--xreffile>
+
+specify a cross-reference file for gene-based annotation, so that the final
+output includes extra columns for genes
 
 =back
 
 =head1 DESCRIPTION
 
-ANNOVAR is a software tool that can be used to functionally annotate a list of 
-genetic variants, possibly generated from next-generation sequencing 
-experiments. For example, given a whole-genome resequencing data set for a human 
-with specific diseases, typically around 3 million SNPs and around half million 
-insertions/deletions will be identified. Given this massive amounts of data (and 
-candidate disease- causing variants), it is necessary to have a fast algorithm 
-that scans the data and identify a prioritized subset of variants that are most 
+ANNOVAR is a software tool that can be used to functionally annotate a list of
+genetic variants, possibly generated from next-generation sequencing
+experiments. For example, given a whole-genome resequencing data set for a human
+with specific diseases, typically around 3 million SNPs and around half million
+insertions/deletions will be identified. Given this massive amounts of data (and
+candidate disease- causing variants), it is necessary to have a fast algorithm
+that scans the data and identify a prioritized subset of variants that are most
 likely functional for follow-up Sanger sequencing studies and functional assays.
 
-The table_annovar.pl program is designed to replace summarize_annovar.pl in 
-earlier version of ANNOVAR. Basically, it takes an input file, and run a series 
-of annotations on the input file, and generate a tab-delimited output file, 
-where each column represent a specific type of annotation. Therefore, the new 
-table_annovar.pl allows better customization for users who want to annotate 
+The table_annovar.pl program is designed to replace summarize_annovar.pl in
+earlier version of ANNOVAR. Basically, it takes an input file, and run a series
+of annotations on the input file, and generate a tab-delimited output file,
+where each column represent a specific type of annotation. Therefore, the new
+table_annovar.pl allows better customization for users who want to annotate
 specific columns.
 
-ANNOVAR is freely available to the community for non-commercial use. For 
+ANNOVAR is freely available to the community for non-commercial use. For
 questions or comments, please contact kai@openbioinformatics.org.
 
 =cut

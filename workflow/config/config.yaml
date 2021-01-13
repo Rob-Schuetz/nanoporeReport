@@ -2,9 +2,9 @@ nanoporeReport:
   project_root: /home/ubuntu/projects/nanoporeReport/
   output_root: results
   input_root: input
-  build: hg19  #hg38
-  annovar_script: /home/ubuntu/projects/nanoporeReport/build_report/annovar/table_annovar.pl
-  human_db: /home/ubuntu/projects/nanoporeReport/build_report/annovar/humandb/
+  build: hg38  #hg38
+  annovar_script: /home/ubuntu/projects/nanoporeReport/workflow/annovar/table_annovar.pl
+  human_db: /home/ubuntu/projects/nanoporeReport/workflow/annovar/humandb/
   dp_threshold: 500
 
 jasperserver:
@@ -18,7 +18,7 @@ flaskAPI:
   hostname: localhost
   port: 5000
   allowFrom: 0.0.0.0
-  sub_command: /home/ubuntu/projects/nanoporeReport/build_report/scripts/snake.sh
+  sub_command: /home/ubuntu/projects/nanoporeReport/workflow/snakemake/snake.sh
   log_dir: /home/ubuntu/projects/nanoporeReport/api/logs
 
 database:

@@ -1,8 +1,8 @@
 import sys
 import os
-sys.path.append(os.path.join(os.getcwd(), '..', '..', 'scripts'))
-sys.path.append(os.path.join(os.getcwd(), '..', 'scripts'))
-sys.path.append(os.path.join(os.getcwd(), 'scripts'))
+sys.path.append(os.path.join(os.getcwd(), '..', '..', 'snakemake'))
+sys.path.append(os.path.join(os.getcwd(), '..', 'snakemake'))
+sys.path.append(os.path.join(os.getcwd(), 'snakemake'))
 from genomics import get_config
 
 

@@ -36,19 +36,20 @@ yarn-error.log*
 ##################################################
 
 # Report specific intermediate files
-/build_report/input
-/build_report/results
+/workflow/input
+/workflow/results
 
 # jetbrains config
-/build_report/.idea
+/workflow/.idea
 
 # Annovar db
-/build_report/annovar/humandb
+/workflow/annovar/humandb
+/workflow/annovar/example
 
 # Snakemake
-/build_report/scripts/.snakemake
-/build_report/scripts/dag.svg
-/build_report/scripts/genomics/__pycache__/*
+/workflow/snakemake/.snakemake
+/workflow/snakemake/dag.svg
+/workflow/snakemake/genomics/__pycache__/*
 
 # API logs
 /api/logs
@@ -57,7 +58,7 @@ yarn-error.log*
 =======
 /api/venv/*
 >>>>>>> 19bcf862de4ddd1af8d7d65f3f744fbf137dfe04
-/build_report/scripts/dag.svg
+/workflow/snakemake/dag.svg
 
 # Don't know what these are
 .eslintcache

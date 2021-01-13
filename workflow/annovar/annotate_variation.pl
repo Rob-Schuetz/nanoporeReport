@@ -6,9 +6,9 @@ use Getopt::Long;
 use File::Spec;
 use Cwd;
 
-our $REVISION = '$Revision: 11f4bb33cd1289ba7c43dadc20b3e9982b5a9a00 $';
-our $DATE =	'$Date: 2016-02-01 00:11:04 -0800 (Mon,  1 Feb 2016) $';  
-our $AUTHOR =	'$Author: Kai Wang <kai@openbioinformatics.org> $';
+our $REVISION = '$Revision: 6b5656c3a8e640eea2984b2037ef4226001dcc94 $';
+our $DATE =	'$Date: 2020-06-07 23:56:37 -0400 (Sun,  7 Jun 2020) $';  
+our $AUTHOR =	'$Author: Kai Wang <kaichop@gmail.com> $';
 
 our ($verbose, $help, $man);
 our ($queryfile, $dbloc);
@@ -37,7 +37,7 @@ our %codon3m = (TTT=>"Phe", TTC=>"Phe", TCT=>"Ser", TCC=>"Ser", TAT=>"Tyr", TAC=
 our %codonfullm = (TTT=>"Phenylalanine", TTC=>"Phenylalanine", TCT=>"Serine", TCC=>"Serine", TAT=>"Tyrosine", TAC=>"Tyrosine", TGT=>"Cysteine", TGC=>"Cysteine", TTA=>"Leucine", TCA=>"Serine", TAA=>"Stop", TGA=>"Tryptophan", TTG=>"Leucine", TCG=>"Serine", TAG=>"Stop", TGG=>"Tryptophan", CTT=>"Leucine", CTC=>"Leucine", CCT=>"Proline", CCC=>"Proline", CAT=>"Histidine", CAC=>"Histidine", CGT=>"Arginine", CGC=>"Arginine", CTA=>"Leucine", CTG=>"Leucine", CCA=>"Proline", CCG=>"Proline", CAA=>"Glutamine", CAG=>"Glutamine", CGA=>"Arginine", CGG=>"Arginine", ATT=>"Isoleucine", ATC=>"Isoleucine", ACT=>"Threonine", ACC=>"Threonine", AAT=>"Asparagine", AAC=>"Asparagine", AGT=>"Serine", AGC=>"Serine", ATA=>"Methionine", ACA=>"Threonine", AAA=>"Lysine", AGA=>"Stop", ATG=>"Methionine", ACG=>"Threonine", AAG=>"Lysine", AGG=>"Stop", GTT=>"Valine", GTC=>"Valine", GCT=>"Alanine", GCC=>"Alanine", GAT=>"Aspartic acid", GAC=>"Aspartic acid", GGT=>"Glycine", GGC=>"Glycine", GTA=>"Valine", GTG=>"Valine", GCA=>"Alanine", GCG=>"Alanine", GAA=>"Glutamic acid", GAG=>"Glutamic acid", GGA=>"Glycine", GGG=>"Glycine");
 our %codonr1m = (UUU=>"F", UUC=>"F", UCU=>"S", UCC=>"S", UAU=>"Y", UAC=>"Y", UGU=>"C", UGC=>"C", UUA=>"L", UCA=>"S", UAA=>"*", UGA=>"W", UUG=>"L", UCG=>"S", UAG=>"*", UGG=>"W", CUU=>"L", CUC=>"L", CCU=>"P", CCC=>"P", CAU=>"H", CAC=>"H", CGU=>"R", CGC=>"R", CUA=>"L", CUG=>"L", CCA=>"P", CCG=>"P", CAA=>"Q", CAG=>"Q", CGA=>"R", CGG=>"R", AUU=>"I", AUC=>"I", ACU=>"T", ACC=>"T", AAU=>"N", AAC=>"N", AGU=>"S", AGC=>"S", AUA=>"M", ACA=>"T", AAA=>"K", AGA=>"*", AUG=>"M", ACG=>"T", AAG=>"K", AGG=>"*", GUU=>"V", GUC=>"V", GCU=>"A", GCC=>"A", GAU=>"D", GAC=>"D", GGU=>"G", GGC=>"G", GUA=>"V", GUG=>"V", GCA=>"A", GCG=>"A", GAA=>"E", GAG=>"E", GGA=>"G", GGG=>"G");
 our %codonr3m = (UUU=>"Phe", UUC=>"Phe", UCU=>"Ser", UCC=>"Ser", UAU=>"Tyr", UAC=>"Tyr", UGU=>"Cys", UGC=>"Cys", UUA=>"Leu", UCA=>"Ser", UAA=>"*", UGA=>"Trp", UUG=>"Leu", UCG=>"Ser", UAG=>"*", UGG=>"Trp", CUU=>"Leu", CUC=>"Leu", CCU=>"Pro", CCC=>"Pro", CAU=>"His", CAC=>"His", CGU=>"Arg", CGC=>"Arg", CUA=>"Leu", CUG=>"Leu", CCA=>"Pro", CCG=>"Pro", CAA=>"Gln", CAG=>"Gln", CGA=>"Arg", CGG=>"Arg", AUU=>"Ile", AUC=>"Ile", ACU=>"Thr", ACC=>"Thr", AAU=>"Asn", AAC=>"Asn", AGU=>"Ser", AGC=>"Ser", AUA=>"Met", ACA=>"Thr", AAA=>"Lys", AGA=>"*", AUG=>"Met", ACG=>"Thr", AAG=>"Lys", AGG=>"*", GUU=>"Val", GUC=>"Val", GCU=>"Ala", GCC=>"Ala", GAU=>"Asp", GAC=>"Asp", GGU=>"Gly", GGC=>"Gly", GUA=>"Val", GUG=>"Val", GCA=>"Ala", GCG=>"Ala", GAA=>"Glu", GAG=>"Glu", GGA=>"Gly", GGG=>"Gly");
-our %codonrfullm = (UUU=>"Phenylalanine", UUC=>"Phenylalanine", UCU=>"Serine", UCC=>"Serine", UAU=>"Tyrosine", UAC=>"Tyrosine", UGU=>"Cysteine", UGC=>"Cysteine", UUA=>"Leucine", UCA=>"Serine", UAA=>"Stop", UGA=>"Tryptophan", UUG=>"Leucine", UCG=>"Serine", UAG=>"Stop", UGG=>"Tryptophan", CUU=>"Leucine", CUC=>"Leucine", CCU=>"Proline", CCC=>"Proline", CAU=>"Histidine", CAC=>"Histidine", CGU=>"Arginine", CGC=>"Arginine", CUA=>"Leucine", CUG=>"Leucine", CCA=>"Proline", CCG=>"Proline", CAA=>"Glutamine", CAG=>"Glutamine", CGA=>"Arginine", CGG=>"Arginine", AUU=>"Isoleucine", AUC=>"Isoleucine", ACU=>"Threonine", ACC=>"Threonine", AAU=>"Asparagine", AAC=>"Asparagine", AGU=>"Serine", AGC=>"Serine", AUA=>"Methionine", ACA=>"Threonine", AAA=>"Lysine", AGA=>"Stop", AUG=>"Methionine", ACG=>"Threonine", AAG=>"Lysine", AGG=>"Stop", GUU=>"Valine", GUC=>"Valine", GCU=>"Alanine", GCC=>"Alanine", GAU=>"Aspartic acid", GAC=>"Aspartic acid", GGU=>"Glycine", GGC=>"Glycine", GUA=>"Valine", GUG=>"Valine", GCA=>"Alanine", GCG=>"Alanine", GAA=>"Glutamic acid", GAG=>"Glutamic acid", GGA=>"Glycine", GGG=>"Glycine");
+our %codonrfullm = (UUU=>"Phenylalanine", UUC=>"Phenylalanine", UCU=>"Serine", UCC=>"Serine", UAU=>"Tyrosine", UAC=>"Tyrosine", UGU=>"Cysteine", UGC=>"Cysteine", UUA=>"Leucine", UCA=>"Serine", UAA=>"Stop", UGA=>"Tryptophan", UUG=>"Leucine", UCG=>"Serine", UAG=>"Stop", UGG=>"Tryptophan", CUU=>"Leucine", CUC=>"Leucine", CCU=>"Proline", CCC=>"Proline", CAU=>"Histidine", CAC=>"Histidine", CGU=>"Arginine", CGC=>"Arginine", CUA=>"Leucine", CUG=>"Leucine", CCA=>"Proline", CCG=>"Proline", CAA=>"Glutamine", CAG=>"Glutamine", CGA=>"Arginine", CGG=>"Arginine", AUU=>"Isoleucine", AUC=>"Isoleucine", ACU=>"Threonine", ACC=>"Threonine", AAU=>"Asparagine", AAC=>"Asparagine", AGU=>"Serine", AGC=>"Serine", AUA=>"Methionine", ACA=>"Threonine", AAA=>"Lysine", AGA=>"Stop", AUG=>"Methionine", ACG=>"Threonine", AAG=>"Lysine", AGG=>"Stop", GUU=>"Valine", GUC=>"Valine", GCU=>"Alanine", GCC=>"Alanine", GAU=>"Aspartic acid", GAC=>"Aspartic acid", GGU=>"Glycine", GGC=>"Glycine", GUA=>"Valine", GUG=>"Valine", GCA=>"Alanine", GCG=>"Alanine", GAA=>"Glutamic acid", GAG=>"Glutamic acid", GGA=>"Glycine", GGG=>"Glycine"); 		#"
 
 our %iupac = (R=>'AG', Y=>'CT', S=>'GC', W=>'AT', K=>'GT', M=>'AC', A=>'AA', C=>'CC', G=>'GG', T=>'TT', B=>'CGT', D=>'AGT', H=>'ACT', V=>'ACG', N=>'ACGT', '.'=>'-', '-'=>'-');
 
@@ -49,16 +49,16 @@ $time and printerr "NOTICE: Current time (before execution) is ", scalar (localt
 
 # print out output file names
 if ($geneanno) {
-	printerr "NOTICE: Output files were written to $outfile.variant_function, $outfile.exonic_variant_function\n";
+	printerr "NOTICE: Output files are written to $outfile.variant_function, $outfile.exonic_variant_function\n";
 } elsif ($regionanno) {
 	printerr "NOTICE: Output file is written to $outfile.${buildver}_$dbtype1\n";
 } elsif ($filter) {
-	printerr "NOTICE: Variants matching filtering criteria are written to $outfile.${buildver}_${dbtype1}_dropped, other variants are written to $outfile.${buildver}_${dbtype1}_filtered\n";
+	printerr "NOTICE: Output file with variants matching filtering criteria is written to $outfile.${buildver}_${dbtype1}_dropped, and output file with other variants is written to $outfile.${buildver}_${dbtype1}_filtered\n";
 }
 
-# check number of input lines in query, and adjust number of threads accordingly for gene-based annotation
-# my general observation is that when input line is less than 1 million, multi-threading does not really improve performance and should be disabled (--mingenelinecount controls this)
-# another observation is that when number of threads are too high, the program runs slower (--maxgenethread controls this)
+# check number of input lines in query, and adjust number of threads accordingly for gene-based annotation (when the user specifies -thread argument for multi-threading)
+# my general observation is that when input line is less than 1 million, multi-threading does not really improve performance and should be disabled (--mingenelinecount controls this behavior)
+# another observation is that when number of threads are too high, the program runs slower (--maxgenethread controls this); this is dependent on the I/O of the specific computing platform
 my ($queryfile_line_count, $chunk_line_count);
 if ($thread) {
 	($queryfile_line_count, $chunk_line_count) = calculateChunkLine ($queryfile, $thread);
@@ -122,7 +122,7 @@ if ($thread) {
 # delete invlid_input file if it has zero size, otherwise print out the number of invalid lines
 if (not $downdb) {
 	if (not -z "$outfile.invalid_input") {
-		printerr "NOTICE: Variants with invalid input format were written to $outfile.invalid_input\n";
+		printerr "NOTICE: Variants with invalid input format are written to $outfile.invalid_input\n";
 	} else {
 		unlink ("$outfile.invalid_input");
 	}
@@ -142,11 +142,11 @@ sub combineFile {
 		my $msg = qx/cat --help 2>&1/ || '';		#collect the output of the system command
 		if ($msg =~ m/^Usage/) {
 			for my $j (0 .. @suffix-1) {
-				system ("cat $outfile.$suffix[$j].$i >> $outfile.$suffix[$j]");
+				system ("cat $outfile.$suffix[$j].$i >> $outfile.$suffix[$j]");		#if `cat` is available (in Linux/Unix, Apple Mac OS, etc), use it
 			}
 		} else {
 			for my $j (0 .. @suffix-1) {
-				appendFile ("$outfile.$suffix[$j].$i", "$outfile.$suffix[$j]");
+				appendFile ("$outfile.$suffix[$j].$i", "$outfile.$suffix[$j]");		#if `cat` is not available (in Windows), use appendFile() subroutine instead, which is slower
 			}
 		}
 		for my $j (0 .. @suffix-1) {
@@ -159,15 +159,15 @@ sub combineFile {
 sub calculateChunkLine {
 	my ($queryfile, $thread) = @_;
 	my $chunk_line_count;
-	my $queryfile_line_count = `cat $queryfile | wc -l 2>&1`;
+	my $queryfile_line_count = `cat $queryfile | wc -l 2>&1`;		#if `cat` and `wc` are available (in Linux/Unix, Apple Mac OS, etc), use it
 	chomp $queryfile_line_count;
 	if ($queryfile_line_count =~ m/^\d+$/) {	#integer should be returned if the command finishes successfully
-		printerr ("NOTICE: the queryfile contains $queryfile_line_count lines\n");
-	} else {					#otherwise, open the file and count the number of lines
+		printerr ("NOTICE: the queryfile $queryfile contains $queryfile_line_count lines\n");
+	} else {									#if `cat` and `wc` are not available (in Windows), open the file and count the number of lines
 		open (QUERY, $queryfile);
 		$queryfile_line_count++ while (<QUERY>);
 		close (QUERY);
-		printerr ("NOTICE: the queryfile contains $queryfile_line_count lines\n");
+		printerr ("NOTICE: the queryfile $queryfile contains $queryfile_line_count lines\n");
 	}
 	if ($queryfile_line_count % $thread == 0) {
 		$chunk_line_count = $queryfile_line_count/$thread;
@@ -177,7 +177,7 @@ sub calculateChunkLine {
 	return ($queryfile_line_count, $chunk_line_count);
 }
 
-# Append the content of one file to another, in case "cat" system command is not availalbe in the operating system
+# Append the content of one file to another, in case "cat" system command is not availalbe in the current operating system
 sub appendFile {
 	my ($file1, $file2) = @_;
 	open (FH1, $file1) or die "Error: cannot read from file $file1: $!\n";
@@ -213,7 +213,7 @@ sub processArguments {
 	($queryfile, $dbloc) = @ARGV;
 
 	$dbloc =~ s/[\\\/]+$//;			#delete the trailing / or \ sign as part of the directory name
-	$dbloc =~ s{^~([^/]*)} { $1 ? (getpwnam($1))[7] : ( $ENV{HOME} || $ENV{LOGDIR} || (getpwuid($>))[7])}ex;		#expand the ~ tilde to full path name
+	$dbloc =~ s{^~([^/]*)} { $1 ? (getpwnam($1))[7] : ( $ENV{HOME} || $ENV{LOGDIR} || (getpwuid($>))[7])}ex;		#expand the ~ tilde to full path name (sometimes, annotate_variation.pl is not executed by the shell but excuted by other environments that do not recognize ~, so it is important to expand ~ to increase system compatibility)
 
 	
 	if (defined $batchsize) {
@@ -236,7 +236,7 @@ sub processArguments {
 		}
 	}
 
-	$verbose ||= 0;			#when it is not specified, it is zero
+	$verbose ||= 0;				#when it is not specified, it is zero
 	$neargene ||= 1_000;		#for upstream/downstream annotation of variants, specify the distance threshold between variants and genes
 	$expandbin ||= int(2_000_000/$genomebinsize);		#for gene-based annotations, when intergenic variants are found, expand to specified number of nearby bins to find closest genes
 	$outfile ||= $queryfile;	#specify the prefix of output file names
@@ -251,7 +251,7 @@ sub processArguments {
 	} else {
 		open (LOG, ">$outfile.log") or die "Error: cannot write LOG information to log file $outfile.log: $!\n";
 	}
-	print LOG "ANNOVAR Version:\n\t", q/$Date: 2016-02-01 00:11:04 -0800 (Mon,  1 Feb 2016) $/, "\n";
+	print LOG "ANNOVAR Version:\n\t", q/$Date: 2020-06-07 23:56:37 -0400 (Sun,  7 Jun 2020) $/, "\n";
 	print LOG "ANNOVAR Information:\n\tFor questions, comments, documentation, bug reports and program update, please visit http://www.openbioinformatics.org/annovar/\n";
 	print LOG "ANNOVAR Command:\n\t$0 @command_line\n";
 	print LOG "ANNOVAR Started:\n\t", scalar (localtime), "\n";
@@ -268,12 +268,10 @@ sub processArguments {
 	}
 		
 	my %dbtype1 = ('gene'=>'refGene', 'refgene'=>'refGene', 'knowngene'=>'knownGene', 'ensgene'=>'ensGene', 'band'=>'cytoBand', 'cytoband'=>'cytoBand', 'tfbs'=>'tfbsConsSites', 'mirna'=>'wgRna',
-			'mirnatarget'=>'targetScanS', 'segdup'=>'genomicSuperDups', 'omimgene'=>'omimGene', 'gwascatalog'=>'gwasCatalog', 
+			'mirnatarget'=>'targetScanS', 'segdup'=>'genomicSuperDups', 'omimgene'=>'omimGene', 'gwascatalog'=>'gwasCatalog',
 			'1000g_ceu'=>'CEU.sites.2009_04', '1000g_yri'=>'YRI.sites.2009_04', '1000g_jptchb'=>'JPTCHB.sites.2009_04', 
-			'1000g2010_ceu'=>'CEU.sites.2010_03', '1000g2010_yri'=>'YRI.sites.2010_03', '1000g2010_jptchb'=>'JPTCHB.sites.2010_03',
-			'1000g2010jul_ceu'=>'CEU.sites.2010_07', '1000g2010jul_yri'=>'YRI.sites.2010_07', '1000g2010jul_jptchb'=>'JPTCHB.sites.2010_07',
-			'1000g2010nov_all'=>'ALL.sites.2010_11', '1000g2011may_all'=>'ALL.sites.2011_05'
-			);
+			'1000g2010_ceu'=>'CEU.sites.2010_03', '1000g2010_yri'=>'YRI.sites.2010_03', '1000g2010_jptchb'=>'JPTCHB.sites.2010_03',			
+			);		#for backward compatibility when these lower-case keywords were used in previous versions of ANNOVAR (the /^1000g(20\d\d)([a-z]{3})_([a-z]+)$/ pattern is handled below)
 
 		
 	if ($geneanno) {
@@ -288,10 +286,16 @@ sub processArguments {
 		if ($dbtype1 eq 'gff3') {
 			defined $gff3dbfile or pod2usage ("Error in argument: please specify --gff3dbfile for the --dbtype of 'gff3'");
 		}
+		if ($dbtype1 eq 'generic') {
+			defined $genericdbfile or pod2usage ("Error in argument: please specify --genericdbfile for the --dbtype of 'generic'");
+		}
+		if ($dbtype1 eq 'bed') {
+			defined $bedfile or pod2usage ("Error in argument: please specify --bedfile for the --dbtype of 'bed'");
+		}
 	} elsif ($filter) {
 		defined $dbtype or pod2usage ("Error in argument: please specify --dbtype (required for the --filter operation)");
 		#as of Feb 2012, I no longer check the validity of the database name for -filter operation, to give users the maximum amount of flexibility in designing and using their own favorite databases
-		$dbtype =~ m/^avsift|generic|1000g_(ceu|yri|jptchb)|1000g2010_(ceu|yri|jptchb)|1000g20\d\d[a-z]{3}_[a-z]+|snp\d+\w+?|vcf|(ljb_[\w\+]+)|esp\d+_[\w]+$/ or print STDERR "NOTICE: the --dbtype $dbtype is assumed to be in generic ANNOVAR database format\n";
+		$dbtype =~ m/^avsift|1000g_(ceu|yri|jptchb)|1000g2010_(ceu|yri|jptchb)|1000g20\d\d[a-z]{3}_[a-z]+|[A-Z][A-Z][A-Z]\.sites.\d{4}_\d{2}|snp\d+\w+?|vcf|(ljb_[\w\+]+)|esp\d+_[\w]+|gnomad\w+|exac\w+|dbnsfp\w+$/ or print STDERR "NOTICE: the --dbtype $dbtype is assumed to be in generic ANNOVAR database format\n";
 		
 		$dbtype1 = $dbtype1{$dbtype} || $dbtype;
 		
@@ -358,7 +362,7 @@ sub processArguments {
 		$geneanno or pod2usage ("Error: the --indel_splicing_threshold is supported only for the --geneanno operation");
 	}
 	else {
-		$indel_splicing_threshold = $splicing_threshold;    #if not set, preserve original behavior;
+		$indel_splicing_threshold = $splicing_threshold;    #if not set, preserve original behavior
 	}
 	if (defined $maf_threshold) {
 		$filter or pod2usage ("Error in argument: the --maf_threshold is supported only for the --filter operation");
@@ -380,7 +384,7 @@ sub processArguments {
 		$regionanno or pod2usage ("Error in argument: the --bedfile argument is supported only for the --regionanno operation");
 	}
 	if (defined $genericdbfile) {
-		$filter or pod2usage ("Error in argument: the --genericdbfile argument is supported only for the --filter operation");
+		$filter or $regionanno or pod2usage ("Error in argument: the --genericdbfile argument is supported only for the --filter and -region operation");
 	}
 	if (defined $wget) {
 		$downdb or pod2usage ("Error in argument: the --wget argument is supported only for the --downdb operation");
@@ -389,7 +393,11 @@ sub processArguments {
 	}
 	if (defined $precedence) {
 		$geneanno or pod2usage ("Error in argument: the --precedence argument is supported only for the --geneanno operation");
-		@precedence = split (/,/, $precedence);
+		if ($precedence =~ m/#/) {
+			@precedence = split (/#/, $precedence);
+		} else {
+			@precedence = split (/,/, $precedence);
+		}
 		@precedence >= 2 or pod2usage ("Error in argument: the --precedence argument should be comma delimited");
 		for my $i (0 .. @precedence-1) {
 			$precedence[$i] =~ m/^(exonic|intronic|splicing|utr5|utr3|upstream|downstream|splicing|ncrna)$/ or pod2usage ("Error in argument: the --precedence argument contains invalid keywords (valid ones are exonic|intronic|splicing|utr5|utr3|upstream|downstream|splicing)");
@@ -403,7 +411,11 @@ sub processArguments {
 		} elsif (lc $colsWanted eq 'none') {
 			@colsWanted = ('none');
 		} else {
-			@colsWanted = split (/,/, $colsWanted);
+			if ($colsWanted =~ m/#/) {		#by default, -colsWanted are comma separated, but occasionally (for example, when use in table_annovar.pl, the user may want to use # to separate the columns)
+				@colsWanted = split (/#/, $colsWanted);
+			} else {
+				@colsWanted = split (/,/, $colsWanted);
+			}
 			for my $i (0 .. @colsWanted-1) {
 				$colsWanted[$i]=~m/^\d+$/ or pod2usage ("Error in argument: the --colsWanted argument ($colsWanted) must be a list of comma delimited numbers or be 'all' or be 'none'");
 			}
@@ -424,8 +436,14 @@ sub processArguments {
 	}
 	
 	if (defined $avcolumn) {
-		$avcolumn =~ m/^\d+,\d+,\d+,\d+,\d+$/ or pod2usage ("Error in argument: the --avcolumn argument must be five integer numbers separated by comma");
-		@avcolumn = split (/,/, $avcolumn);
+		if ($avcolumn =~ m/^\d+,\d+,\d+,\d+,\d+$/) {
+			@avcolumn = split (/,/, $avcolumn);
+		} elsif ($avcolumn =~ m/^\d+#\d+#\d+#\d+#\d+$/) {
+			@avcolumn = split (/#/, $avcolumn);
+		} else {
+			pod2usage ("Error in argument: the --avcolumn argument must be five integer numbers separated by comma or #");
+		}
+		
 		@avcolumn = map {$_-1} @avcolumn;
 	} else {
 		@avcolumn = (0..4);		#by default, the first five columns are the required AVINPUT information
@@ -433,7 +451,7 @@ sub processArguments {
 	
 	if (defined $webfrom) {
 		if ($webfrom ne 'ucsc' and $webfrom ne 'annovar') {
-			$webfrom =~ m#^(http://|ftp://)# or pod2usage ("Error: the --webfrom argument needs to be 'ucsc', 'annovar', or a URL");
+			$webfrom =~ m#^(http://|https://|ftp://)# or pod2usage ("Error: the --webfrom argument needs to be 'ucsc', 'annovar', or a URL");	#20191010: add https as an option
 		}
 	} else {
 		$webfrom = 'ucsc';
@@ -455,7 +473,12 @@ sub processArguments {
 	$memtotal and $memtotal >= 100_000 || pod2usage ("Error in argument: the --memtotal argument must be at least 100000 (in the order of kilobytes)");
 	
 	if ($chromosome) {
-		my @chr = split (/,/, $chromosome);
+		my @chr;
+		if ($chromosome =~ m/#/) {
+			@chr = split (/#/, $chromosome);
+		} else {
+			@chr = split (/,/, $chromosome);
+		}
 		for my $i (0 .. @chr-1) {
 			if ($chr[$i] =~ m/^(\d+)-(\d+)$/) {
 				for my $j ($1 .. $2) {
@@ -540,7 +563,9 @@ sub detectInvalidInput {
 		($ref, $obs) = (uc $ref, uc $obs);
 		$zerostart and $start++;
 		$chr =~ s/^chr//;
-		if ($chr =~ m/[^\w\.]/ or $start =~ m/[^\d]/ or $end =~ m/[^\d]/) {		#chr name could contain . (example: GL000212.1, or Zv9_NA###
+		$ref =~ s/^\-+$/-/;		#sometimes users use -- as the reference allele for whatever reason
+		$obs =~ s/^\-+$/-/;		#sometimes users use -- as the alternative allele for whatever reason
+		if ($chr =~ m/[^\w\.\-]/ or $start =~ m/[^\d]/ or $end =~ m/[^\d]/) {		#chr name could contain . (example: GL000212.1, or Zv9_NA###, or ERCC-3324
 			$invalid++;
 		} elsif ($ref eq '-' and $obs eq '-' 		#both are empty allele
 			or $ref =~ m/[^ACTG0\-]/ 		#non-standard nucleotide code
@@ -645,6 +670,7 @@ sub processNextQueryBatchByGeneThread {
 		my (%intronic, %utr5, %utr3, %exonic, %upstream, %downstream, %ncrna, %intergenic, %splicing, %splicing_anno, %newutr5, %newutr3);
 		my $foundgenic;						#variant found in genic region (between start and end position of a gene in genome)
 		my ($distl, $distr, $genel, $gener);			#for intergenic variant, the distance and gene name to the left and right side of gene
+		my ($distup, $distdown);				#for upstream/downstream variants, the distance to the transcript
 		my $bin1 = int ($start/$genomebinsize)-1;		#start bin
 		$bin1 < 0 and $bin1=0;
 		my $bin2 = int ($end/$genomebinsize)+1;			#end bin (usually same as start bin, unless the query is really big that spans multiple megabases)
@@ -668,12 +694,12 @@ sub processNextQueryBatchByGeneThread {
 				$seen{$name, $txstart}++;			#a transcript may be in two adjacent bins, so if one is already scanned, there is no need to work on it again
 				my $current_ncRNA;
 				
-				if ($transfun) {				#variant_function output contains transcript name, rather than gene name
+				if ($transfun) {					#variant_function output contains transcript name, rather than gene name
 					$name2 = $name;
 					$name2 =~ s/#\w+#\d+//;			#20140711 (issue:multimap) multimap issue
 				}
 				
-				if (not $foundgenic) {				#this variant has not hit a genic region yet
+				if (not $foundgenic or $separate) {				#this variant has not hit a genic region yet (and -separate is not specified, 20170712)
 					if ($start > $txend) {
 						defined $distl or $distl = $start-$txend and $genel=$name2;
 						$distl > $start-$txend and $distl = $start-$txend and $genel=$name2;	#identify left closest gene
@@ -688,12 +714,14 @@ sub processNextQueryBatchByGeneThread {
 				if ($end < $txstart) {
 					#query ---
 					#gene		<-*----*->
-					$foundgenic and last;					#if found a genic annotation already, end the search of the bins
+					not $separate and $foundgenic and last;			#if found a genic annotation already, end the search of the bins (however, if -separate is specified, we should not end the search)
 					if ($end > $txstart - $neargene) {
 						if ($dbstrand eq '+') {
 							$upstream{$name2}++;
+							$distup = $distr;
 						} else {
 							$downstream{$name2}++;
+							$distdown = $distr;
 						}
 					} else {
 						last;						#if transcript is too far away from end, end the search of the bins
@@ -701,11 +729,13 @@ sub processNextQueryBatchByGeneThread {
 				} elsif ($start > $txend) {
 					#query            ---
 					#gene  <-*----*->
-					if (not $foundgenic and $start < $txend + $neargene) {
+					if ($separate || not $foundgenic and $start < $txend + $neargene) {	#similar to above, if separate is specified, we still record up/downstream regardless of foundgenic
 						if ($dbstrand eq '+') {
 							$downstream{$name2}++;
+							$distdown = $distl;
 						} else {
 							$upstream{$name2}++;
+							$distup = $distl;
 						}
 					}
 				#} elsif ($cdsstart == $cdsend+1) {				#non-coding RNA (could be microRNA, or could be due to lack of CDS annotation for mRNA such as NR_026730 or BC039000). Previously we already did cdsstart++ so here the cdsstart is more than cdsend
@@ -735,6 +765,7 @@ sub processNextQueryBatchByGeneThread {
 					my @exonend = @$exonend;
 					my $foundexonic;
 					my $utr_canno;						#cDNA level annotation for UTR variants
+					my ($refcut, $obscut);						#alternative obs by cutting the original obs (when a block substitution overlaps with both exon and intron, we should only use the exonic portion to calculate coding change
 					if ($dbstrand eq '+') {					#forward strand, search from left to right (first exon to last exon)
 						for my $k (0 .. @exonstart-1) {
 							$k and $lenintron += ($exonstart[$k]-$exonend[$k-1]-1);		#calculate cumulative intron length
@@ -794,7 +825,13 @@ sub processNextQueryBatchByGeneThread {
 									} elsif ($k == @exonstart-1 and $end >= $exonstart[$k]-$splicing_threshold and $end <= $exonstart[$k]-1) {	#last exon
 										$splicing{$name2}++;
 									} elsif ($k and $k < @exonstart-1) {										#middle exon
-										if ($end >= $exonstart[$k]-$splicing_threshold and $end <= $exonstart[$k]-1 or $start >= $exonend[$k]+1 and $start <= $exonend[$k]+$splicing_threshold) {
+										#if ($end >= $exonstart[$k]-$splicing_threshold and $end <= $exonstart[$k]-1 or 
+										#$start >= $exonend[$k]+1 and $start <= $exonend[$k]+$splicing_threshold or
+										#$start >= $exonstart[$k]-$splicing_threshold and $start <= $exonstart[$k]-1 or
+										#$end >= $exonend[$k]+1 and $end <= $exonend[$k]+$splicing_threshold
+										if (hasOverlap ($start, $end, $exonstart[$k]-$splicing_threshold, $exonstart[$k]-1) or
+										hasOverlap ($start, $end, $exonend[$k]+1, $exonend[$k]+$splicing_threshold)
+										) {
 											$splicing{$name2}++;		#when query start site is close to exon start or exon end
 										}
 									}
@@ -812,6 +849,32 @@ sub processNextQueryBatchByGeneThread {
 								} elsif ($start > $exonend[$k] and $start <= $exonend[$k]+$splicing_threshold) {
 									#-------<---->-*--------<-->-------<------>----
 									$splicing_anno{$name2} .= "$name:exon${\($k+1)}:c.$lenexon+" . ($start-$exonend[$k]) . "$ref>$obs,";
+								}
+							}
+							#if name2 is already a splicing variant, but its detailed annotation (like c150-2A>G) is not available, and if it leads to UTR change
+							if ($splicing{$name2} and $start==$end and $start<$cdsstart) {
+								if ($start >= $exonstart[$k]-$splicing_threshold and $start < $exonstart[$k]) {
+									#------*-<---->---------<-->-------<------>----
+									$splicing_anno{$name2} .= "$name:exon${\($k+1)}:UTR5,";
+								} elsif ($start > $exonend[$k] and $start <= $exonend[$k]+$splicing_threshold) {
+									#-------<---->-*--------<-->-------<------>----
+									$splicing_anno{$name2} .= "$name:exon${\($k+1)}:UTR5,";
+								}
+							} elsif ($splicing{$name2} and $start==$end and $start>$cdsend) {
+								if ($start >= $exonstart[$k]-$splicing_threshold and $start < $exonstart[$k]) {
+									#------*-<---->---------<-->-------<------>----
+									$splicing_anno{$name2} .= "$name:exon${\($k+1)}:UTR3,";
+								} elsif ($start > $exonend[$k] and $start <= $exonend[$k]+$splicing_threshold) {
+									#-------<---->-*--------<-->-------<------>----
+									$splicing_anno{$name2} .= "$name:exon${\($k+1)}:UTR3,";
+								}
+							}
+							#20180404 IBM change: if name2 is already a splicing variant, but it is an indel, we will just use r.spl (original HGVS (http://www.hgvs.org/mutnomen/examplesRNA.html) or the updated definition (http://varnomen.hgvs.org/recommendations/RNA/variant/splicing/))
+							if ($splicing{$name2} and $start!=$end) {
+								if ($end >= $exonstart[$k]-$splicing_threshold and $end < $exonstart[$k]) {
+									$splicing_anno{$name2} .= "$name:exon${\($k+1)}:r.spl,";
+								} elsif ($start > $exonend[$k] and $start <= $exonend[$k]+$splicing_threshold) {
+									$splicing_anno{$name2} .= "$name:exon${\($k+1)}:r.spl,";
 								}
 							}
 							
@@ -837,6 +900,9 @@ sub processNextQueryBatchByGeneThread {
 										$rvarend = $txend-$txstart-$lenintron+1;		#if this value is longer than transcript length, it suggest whole gene deletion
 									}
 									
+									$refcut = substr ($ref, -($rvarend-$rvarstart+1));	#20170830
+									$obscut = substr ($obs, -($rvarend-$rvarstart+1));	#20170830
+									
 									#here the trick begins to differentiate UTR versus coding exonic
 									if ($end < $cdsstart) {					#usually disrupt/change 5' UTR region, unless the UTR per se is also separated by introns
 										#query  ----
@@ -854,7 +920,7 @@ sub processNextQueryBatchByGeneThread {
 										$utr3{$name2} .= "$utr_canno,";
 									} else {									
 										$exonic{$name2}++;
-										not $current_ncRNA and $obs and push @{$refseqvar{$name}}, [$rcdsstart, $rvarstart, $rvarend, '+', $curlinecount, $k+1, $nextline];	#refseq CDS start, refseq variant start. obs is non-zero (obs is specified by user)
+										not $current_ncRNA and $obs and push @{$refseqvar{$name}}, [$rcdsstart, $rvarstart, $rvarend, '+', $curlinecount, $k+1, $nextline, $refcut, $obscut];	#refseq CDS start, refseq variant start. obs is non-zero (obs is specified by user)
 									}
 									$foundgenic++;
 									last;
@@ -872,6 +938,10 @@ sub processNextQueryBatchByGeneThread {
 										#query              ------
 										#gene     <--**---******---****---->
 										$rvarend = $exonend[$m-1]-$txstart-$lenintron+1 + ($exonstart[$m]-$exonend[$m-1]-1);
+										
+										$refcut = substr ($ref, 0, $rvarend-$rvarstart+1);	#20170830 update obscut since the end is in intronic region
+										$obscut = substr ($obs, 0, $rvarend-$rvarstart+1);	#20170830 update obscut since the end is in intronic region
+										
 										last;
 									} elsif ($end <= $exonend[$m]) {
 										#query           -----------
@@ -923,7 +993,7 @@ sub processNextQueryBatchByGeneThread {
 									
 								} else {
 									$exonic{$name2}++;
-									not $current_ncRNA and $obs and push @{$refseqvar{$name}}, [$rcdsstart, $rvarstart, $rvarend, '+', $curlinecount, $k+1, $nextline];		#queryindex, refseq CDS start, refseq variant start
+									not $current_ncRNA and $obs and push @{$refseqvar{$name}}, [$rcdsstart, $rvarstart, $rvarend, '+', $curlinecount, $k+1, $nextline, $refcut, $obscut];		#queryindex, refseq CDS start, refseq variant start
 								}
 								$foundgenic++;
 								last;
@@ -990,7 +1060,13 @@ sub processNextQueryBatchByGeneThread {
 									} elsif ($k == @exonstart-1 and $end >= $exonstart[$k]-$splicing_threshold and $end <= $exonstart[$k]-1) {
 										$splicing{$name2}++;
 									} elsif ($k and $k < @exonstart-1) {
-										if ($end >= $exonstart[$k]-$splicing_threshold and $end <= $exonstart[$k]-1 or $start >= $exonend[$k]+1 and $start <= $exonend[$k]+$splicing_threshold) {
+										#if ($end >= $exonstart[$k]-$splicing_threshold and $end <= $exonstart[$k]-1 or 
+										#$start >= $exonend[$k]+1 and $start <= $exonend[$k]+$splicing_threshold or
+										#$start >= $exonstart[$k]-$splicing_threshold and $start <= $exonstart[$k]-1 or
+										#$end >= $exonend[$k]+1 and $end <= $exonend[$k]+$splicing_threshold
+										if (hasOverlap ($start, $end, $exonstart[$k]-$splicing_threshold, $exonstart[$k]-1) or
+										hasOverlap ($start, $end, $exonend[$k]+1, $exonend[$k]+$splicing_threshold)
+										) {
 											$splicing{$name2}++;		#when query start site is close to exon start or exon end
 										}
 									}
@@ -1008,7 +1084,38 @@ sub processNextQueryBatchByGeneThread {
 									$splicing_anno{$name2} .= "$name:exon${\(@exonstart-1-$k+1)}:c.$lenexon-" . ($start-$exonend[$k]) . revcom($ref) . '>' . revcom($obs) . ',';	#change ${\(@exonstart-$k+1)} to ${\(@exonstart-1-$k+1)} per Contini Elisa 20150604
 								}
 							}
+							#if name2 is already a splicing variant, but its detailed annotation (like c150-2A>G) is not available, and if it leads to UTR change
+							if ($splicing{$name2} and $start==$end and $start>$cdsend) {
+								if ($start >= $exonstart[$k]-$splicing_threshold and $start < $exonstart[$k]) {
+									#------*-<---->---------<-->-------<------>----
+									$splicing_anno{$name2} .= "$name:exon${\(@exonstart-1-$k+1)}:UTR5,";	#change ${\(@exonstart-$k+1)} to ${\(@exonstart-1-$k+1)} per Contini Elisa 20150604
+								} elsif ($start > $exonend[$k] and $start <= $exonend[$k]+$splicing_threshold) {
+									#-------<---->-*--------<-->-------<------>----
+									$splicing_anno{$name2} .= "$name:exon${\(@exonstart-1-$k+1)}:UTR5,";	#change ${\(@exonstart-$k+1)} to ${\(@exonstart-1-$k+1)} per Contini Elisa 20150604
+								}
+							} elsif ($splicing{$name2} and $start==$end and $start<$cdsstart) {
+								if ($start >= $exonstart[$k]-$splicing_threshold and $start < $exonstart[$k]) {
+									#------*-<---->---------<-->-------<------>----
+									$splicing_anno{$name2} .= "$name:exon${\(@exonstart-1-$k+1)}:UTR3,";	#change ${\(@exonstart-$k+1)} to ${\(@exonstart-1-$k+1)} per Contini Elisa 20150604
+								} elsif ($start > $exonend[$k] and $start <= $exonend[$k]+$splicing_threshold) {
+									#-------<---->-*--------<-->-------<------>----
+									$splicing_anno{$name2} .= "$name:exon${\(@exonstart-1-$k+1)}:UTR3,";	#change ${\(@exonstart-$k+1)} to ${\(@exonstart-1-$k+1)} per Contini Elisa 20150604
+								}
+							}
+							#20180404 IBM change: if name2 is already a splicing variant, but it is an indel, we will just use r.spl (specified in both original HGVS (http://www.hgvs.org/mutnomen/examplesRNA.html) or the updated definition (http://varnomen.hgvs.org/recommendations/RNA/variant/splicing/))
+							if ($splicing{$name2} and $start!=$end) {
+								if ($end >= $exonstart[$k]-$splicing_threshold and $end < $exonstart[$k]) {
+									$splicing_anno{$name2} .= "$name:exon${\(@exonstart-1-$k+1)}:r.spl,";
+								} elsif ($start > $exonend[$k] and $start <= $exonend[$k]+$splicing_threshold) {
+									$splicing_anno{$name2} .= "$name:exon${\(@exonstart-1-$k+1)}:r.spl,";
+								}
+								
+							}
 							
+							#20170830: a major issue is that some mutations span intron/exon boundaries and we should only use the exonic portion as $obs, when calculating amino acid changes
+							#an exmaple is chr9:135772997-135772998CC>TT: we should only use T as the $obs, not TT
+							#however, the current code calculate exonic_variant_function using $obs extracted from $line, making this adjustment complicated
+							#after careful thought, I think the best way forward (with mimimal change to code) is to add a $obscut field in the array to exonic_variant_function. when it is present, use this rather than $obs to calculate c. and p. changes
 							if ($end > $exonend[$k]) {
 								if ($start <= $exonend[$k]) {
 									$rvarstart = $txend-$exonend[$k]-$lenintron+1;
@@ -1028,9 +1135,13 @@ sub processNextQueryBatchByGeneThread {
 											last;
 										}
 									}
+									
 									if (not defined $rvarend) {				#if rvarend is not found, then the whole tail of gene is covered
 										$rvarend = $txend-$txstart-$lenintron+1;
 									}
+									
+									$refcut = substr ($ref, 0, $rvarend-$rvarstart+1);	#20170830
+									$obscut = substr ($obs, 0, $rvarend-$rvarstart+1);	#20170830
 									
 									#here is the trick begins to differentiate UTR versus coding exonic
 									if ($end < $cdsstart) {					#usually disrupt/change 5' UTR region, unless the UTR per se is also separated by introns
@@ -1051,7 +1162,7 @@ sub processNextQueryBatchByGeneThread {
 										
 									} else {
 										$exonic{$name2}++;
-										not $current_ncRNA and $obs and push @{$refseqvar{$name}}, [$rcdsstart, $rvarstart, $rvarend, '-', $curlinecount, @exonstart-$k, $nextline];
+										not $current_ncRNA and $obs and push @{$refseqvar{$name}}, [$rcdsstart, $rvarstart, $rvarend, '-', $curlinecount, @exonstart-$k, $nextline, $refcut, $obscut];
 									}
 									$foundgenic++;
 									last;
@@ -1070,6 +1181,10 @@ sub processNextQueryBatchByGeneThread {
 										#gene     <--**---******---****---->
 										#$rvarend = $txend-$exonstart[$m]-$lenintron+1 - ($exonstart[$m+1]-$exonend[$m]-1);		#commented out 2011feb18 due to bug (10 42244567 42244600 CACCTTTGCTTGATATGATAATATAGTGCCAAGG - hetero)
 										$rvarend = $txend-$exonstart[$m+1]+1 - $lenintron + ($exonstart[$m+1]-$exonend[$m]-1);		#fixed this 2011feb18
+										
+										$refcut = substr ($ref, -($rvarend-$rvarstart+1));	#20170830 update obscut since the start is in intronic region
+										$obscut = substr ($obs, -($rvarend-$rvarstart+1));	#20170830 update obscut since the start is in intronic region
+										
 										last;			#finish the circle of counting exons!!!!!
 									} elsif ($start >= $exonstart[$m]) {			#the start is right located within exon
 										#query        -------
@@ -1122,7 +1237,7 @@ sub processNextQueryBatchByGeneThread {
 									
 								} else {
 									$exonic{$name2}++;
-									not $current_ncRNA and $obs and push @{$refseqvar{$name}}, [$rcdsstart, $rvarstart, $rvarend, '-', $curlinecount, @exonstart-$k, $nextline];
+									not $current_ncRNA and $obs and push @{$refseqvar{$name}}, [$rcdsstart, $rvarstart, $rvarend, '-', $curlinecount, @exonstart-$k, $nextline, $refcut, $obscut];
 								}
 								$foundgenic++;
 								last;
@@ -1261,8 +1376,8 @@ sub processNextQueryBatchByGeneThread {
 				#		print OUT "ncRNA_intronic\t", join(",", sort keys %intronic), "\t", $nextline, "\n";
 				#	}
 				#}
-				%upstream and print $VARFUN "upstream\t", join(",", sort keys %upstream), "\t", $nextline, "\n";
-				%downstream and print $VARFUN "downstream\t", join(",", sort keys %downstream), "\t", $nextline, "\n";
+				%upstream and print $VARFUN "upstream\t", join(",", sort keys %upstream), "(dist=$distup)\t", $nextline, "\n";
+				%downstream and print $VARFUN "downstream\t", join(",", sort keys %downstream), "(dist=$distdown)\t", $nextline, "\n";
 
 			} elsif (%intergenic) {
 				$genel ||= "NONE";
@@ -1394,11 +1509,11 @@ sub processNextQueryBatchByGeneThread {
 				print $VARFUN "intronic\t", join(",", sort keys %intronic), "\t", $nextline, "\n";
 			} elsif (%upstream or %downstream) {
 				if (%upstream and %downstream) {
-					print $VARFUN "upstream;downstream\t", join(",", sort keys %upstream), ";", join(",", sort keys %downstream), "\t", $nextline, "\n";
+					print $VARFUN "upstream;downstream\t", join(",", sort keys %upstream), "(dist=$distup);", join(",", sort keys %downstream), "(dist=$distdown)\t", $nextline, "\n";
 				} elsif (%upstream) {
-					print $VARFUN "upstream\t", join(",", sort keys %upstream), "\t", $nextline, "\n";
+					print $VARFUN "upstream\t", join(",", sort keys %upstream), "(dist=$distup)\t", $nextline, "\n";
 				} else {
-					print $VARFUN "downstream\t", join(",", sort keys %downstream), "\t", $nextline, "\n";
+					print $VARFUN "downstream\t", join(",", sort keys %downstream), "(dist=$distdown)\t", $nextline, "\n";
 				}
 			} elsif (%intergenic) {
 				$genel ||= "NONE";
@@ -1419,7 +1534,7 @@ sub annotateExonicVariantsThread {
 	my ($refseqvar, $geneidmap, $cdslen, $mrnalen, $EXVARFUN) = @_;
 	my $refseqhash;
 	my $function = {};
-	my %varinfo;				#variants information (same as input line)
+	my %varinfo;					#variants information (same as input line)
 	my %unmatch_wtnt_ref;			#count how many user input variant has wildtype nucleotide that does not match reference genome (use hash, because if we use count, we are merely counting variant-transcript combinations)
 	my @unmatch_example;
 	
@@ -1427,7 +1542,7 @@ sub annotateExonicVariantsThread {
 
 	for my $seqid (keys %$refseqvar) {
 		for my $i (0 .. @{$refseqvar->{$seqid}}-1) {
-			my ($refcdsstart, $refvarstart, $refvarend, $refstrand, $index, $exonpos, $nextline) = @{$refseqvar->{$seqid}->[$i]};
+			my ($refcdsstart, $refvarstart, $refvarend, $refstrand, $index, $exonpos, $nextline, $refcut, $obscut) = @{$refseqvar->{$seqid}->[$i]};	#20170830: $obscut is included now
 			my ($wtnt3, $wtnt3_after, @wtnt3, $varnt3, $wtaa, $wtaa_after, $varaa, $varpos);		#wtaa_after is the aa after the wtaa
 			my ($chr, $start, $end, $ref, $obs);
 			my $canno;
@@ -1437,6 +1552,12 @@ sub annotateExonicVariantsThread {
 
 			my @nextline = split (/\s+/, $nextline);
 			($chr, $start, $end, $ref, $obs) = @nextline[@avcolumn];
+			
+			if ($obscut) {
+				$ref = $refcut;
+				$obs = $obscut;		#20170830 update obs to obscut, for indels that covers exon/intron boundaries
+			}
+			
 			($ref, $obs) = (uc $ref, uc $obs);
 			$zerostart and $start++;
 			$chr =~ s/^chr//;
@@ -1493,7 +1614,8 @@ sub annotateExonicVariantsThread {
 				$ref = revcom ($ref);
 			}
 			
-			if ($start == $end) {
+			#if ($start == $end) {		#20170830 sometimes the start!=end for block substitution but the refvarstart==refvarend since a portion is in introns
+			if ($refvarstart == $refvarend) {
 				if ($ref eq '-') {					#insertion variant
 					#the insertion coordinate system in ANNOVAR always uses "position after the current site"
 					#in positive strand, this is okay
@@ -1607,22 +1729,27 @@ sub annotateExonicVariantsThread {
 					}
 					$is_fs++;
 				} elsif (length ($obs) > 1) {				#block substitution (since start==end, this changed from 1nt to several nt)
-		                    if ($fs == 1) {
-		                        $varnt3 = $wtnt3[0] . $obs . $wtnt3[2];
-		                    }
-		                    elsif ($fs == 2) {
-		                        $varnt3 = $wtnt3[0] . $wtnt3[1] . $obs;
-		                    }
-		                    else {
-		                        $varnt3 = $obs . $wtnt3[1] . $wtnt3[2];
-		                    }
-
-					$canno = "c." . ($refvarstart-$refcdsstart+1) . "_" . ($refvarend-$refcdsstart+1) . "delins$obs";
-
+		                    	if ($fs == 1) {
+		                        	$varnt3 = $wtnt3[0] . $obs . $wtnt3[2];
+		                    	}
+		                    	elsif ($fs == 2) {
+		                        	$varnt3 = $wtnt3[0] . $wtnt3[1] . $obs;
+		                    	}
+		                    	else {
+		                        	$varnt3 = $obs . $wtnt3[1] . $wtnt3[2];
+		                    	}
+		                    	
+		                    	
+		                    	#the input "chr14   62162525        62162525        G       GT" needs to be handled correctly c.3delinsGT
+					#$canno = "c." . ($refvarstart-$refcdsstart+1) . "_" . ($refvarend-$refcdsstart+1) . "delins$obs";
+					$canno = "c." . ($refvarstart-$refcdsstart+1) . "delins$obs";	
+					
 					if (($refvarend-$refvarstart+1-length($obs)) % 3 == 0) {
-						$function->{$index}{nfssub} .= "$geneidmap->{$seqid}:$seqid:exon$exonpos:c." . ($refvarstart-$refcdsstart+1) . "_" . ($refvarend-$refcdsstart+1) . "delins$obs,";
+						#$function->{$index}{nfssub} .= "$geneidmap->{$seqid}:$seqid:exon$exonpos:c." . ($refvarstart-$refcdsstart+1) . "_" . ($refvarend-$refcdsstart+1) . "delins$obs,";
+						$function->{$index}{nfssub} .= "$geneidmap->{$seqid}:$seqid:exon$exonpos:" . $canno . ",";
 					} else {
-						$function->{$index}{fssub} .= "$geneidmap->{$seqid}:$seqid:exon$exonpos:c." . ($refvarstart-$refcdsstart+1) . "_" . ($refvarend-$refcdsstart+1) . "delins$obs,";
+						#$function->{$index}{fssub} .= "$geneidmap->{$seqid}:$seqid:exon$exonpos:c." . ($refvarstart-$refcdsstart+1) . "_" . ($refvarend-$refcdsstart+1) . "delins$obs,";
+						$function->{$index}{fssub} .= "$geneidmap->{$seqid}:$seqid:exon$exonpos:" . $canno . ",";
 						$is_fs++;
 					}
 				} else {						#single nucleotide substitution variant
@@ -1736,7 +1863,7 @@ sub annotateExonicVariantsThread {
 
 			} elsif ($obs eq '-') {				#deletion variant involving several nucleotides
 				($wtaa, $varpos) = (translateDNA ($wtnt3, $chr), int(($refvarstart-$refcdsstart)/3)+1);		#wildtype amino acid, position of amino acid
-				my ($varposend, $canno);		#the position of the last amino acid in the deletion
+				my ($varposend, $canno, $panno);		#the position of the last amino acid in the deletion
 				if ($refvarstart<=$refcdsstart and $firstcodondel) {	#since the first amino acid is deleted, the whole gene is considered deleted
 					$function->{$index}{fsdel} .= "$geneidmap->{$seqid}:$seqid:wholegene,";	#it is exonic variant, so the varend has to hit the first exon
 				} elsif ($refvarstart<=$refcdsstart and not $firstcodondel) {	#the first amino acid is deleted but we still report the predicted functional consequence
@@ -1744,25 +1871,33 @@ sub annotateExonicVariantsThread {
 						$varposend = int ($cdslen->{$seqid}/3);
 						$canno = "c." . ($refvarstart-$refcdsstart+1) . "_" . ($cdslen->{$seqid}+$refcdsstart-1) . "del";
 						$is_fs++;
+						$panno = '';
 					} else {
 						$varposend = int (($refvarend-$refcdsstart)/3) + 1;
-						$canno = "c." . 1 . "_" . ($refvarend-$refcdsstart+1) . "del";	#added 20120618
+						if ($refvarend-$refcdsstart > 0) {
+							$canno = "c." . 1 . "_" . ($refvarend-$refcdsstart+1) . "del";	#added 20120618
+							$panno = ":p.$wtaa${varpos}fs";
+						} else {
+							$canno = "c." . 1 . "_" . $cdslen->{$seqid} . "del";			#added 20191010 (the maximum cdot is the length of the transcript
+							$panno = '';
+						}
 						($refvarend-$refvarstart+1) % 3 == 0 or $is_fs++;
 					}
 					#$function->{$index}{fsdel} .= "$geneidmap->{$seqid}:$seqid:exon$exonpos:$canno:p.${varpos}_${varposend}del,";	#per user comments, this is changed to 'fs' below 20140711 (issue:blockfs)
-					$function->{$index}{fsdel} .= "$geneidmap->{$seqid}:$seqid:exon$exonpos:$canno:p.$wtaa${varpos}fs,";
-					
+					$function->{$index}{fsdel} .= "$geneidmap->{$seqid}:$seqid:exon$exonpos:$canno$panno,";
 				} elsif ($refvarend >= $cdslen->{$seqid}+$refcdsstart) {	#3' portion of the gene is deleted
 					$varposend = int ($cdslen->{$seqid}/3);		#cdslen should be multiples of 3, but just in case of database mis-annotation
-					$canno = "c." . ($refvarstart-$refcdsstart+1) . "_" . ($cdslen->{$seqid}+$refcdsstart-1) . "del";
+					#$canno = "c." . ($refvarstart-$refcdsstart+1) . "_" . ($cdslen->{$seqid}+$refcdsstart-1) . "del";	#commented 20170601 due to error on 8       8887543 8887545 AAC     - (hg19)
+					#this is a dilemma: the deletion is more than the coding sequence ends, so I have to pretend that the coding sequence is more than what it shoudl be in the c. notation
+					$canno = "c." . ($refvarstart-$refcdsstart+1) . "_" . ($refvarend-$refcdsstart+1) . "del";
 					#$function->{$index}{fsdel} .= "$geneidmap->{$seqid}:$seqid:exon$exonpos:$canno:p.${varpos}_${varposend}del,";	#per user comments, this is changed to 'fs' below 20140711 (issue:blockfs)
 					$function->{$index}{fsdel} .= "$geneidmap->{$seqid}:$seqid:exon$exonpos:$canno:p.$wtaa${varpos}fs,";
 					$is_fs++;
-				} elsif (($refvarend-$refvarstart+1) % 3 == 0) {
+				} elsif (($refvarend-$refvarstart+1) % 3 == 0) {	#regular nonframeshift deletion
 					$varposend = int (($refvarend-$refcdsstart)/3) + 1;
 					$canno = "c." . ($refvarstart-$refcdsstart+1) . "_" . ($refvarend-$refcdsstart+1) . "del";
 					$function->{$index}{nfsdel} .= "$geneidmap->{$seqid}:$seqid:exon$exonpos:$canno:p.${varpos}_${varposend}del,";
-				} else {
+				} else {	#regular frameshift deletion
 					$varposend = int (($refvarend-$refcdsstart)/3) + 1;
 					$canno = "c." . ($refvarstart-$refcdsstart+1) . "_" . ($refvarend-$refcdsstart+1) . "del";
 					#$function->{$index}{fsdel} .= "$geneidmap->{$seqid}:$seqid:exon$exonpos:$canno:p.${varpos}_${varposend}del,";	#per user comments, this is changed to 'fs' below 20140711 (issue:blockfs)
@@ -1815,15 +1950,22 @@ sub annotateExonicVariantsThread {
 				}
 
 			} else {							#block substitution event
-				if (($refvarend-$refvarstart+1-length($obs)) % 3 == 0) {
-					$function->{$index}{nfssub} .= "$geneidmap->{$seqid}:$seqid:exon$exonpos:c." . ($refvarstart-$refcdsstart+1) . "_" . ($refvarend-$refcdsstart+1) . "$obs,";
+
+
+				#20191010: the block below is changed (1) add delins in the string (2) change the start number to be 1 less if cdot starts before 1
+				if ($refvarstart-$refcdsstart < 0) {	#the start is before the cds, because cdot change from -1 to 1 without 0, we have to treat it differently here
+					$canno = "c." . ($refvarstart-$refcdsstart) . "_" . ($refvarend-$refcdsstart+1) . "delins$obs";	#for example, 37_16-88923279-CCGCCATG-CA__NM_000512 should be c.-1_6T rather than c.0_6T
 				} else {
-					$function->{$index}{fssub} .= "$geneidmap->{$seqid}:$seqid:exon$exonpos:c." . ($refvarstart-$refcdsstart+1) . "_" . ($refvarend-$refcdsstart+1) . "$obs,";
+					$canno = "c." . ($refvarstart-$refcdsstart+1) . "_" . ($refvarend-$refcdsstart+1) . "delins$obs";
+				}            
+
+				if (($refvarend-$refvarstart+1-length($obs)) % 3 == 0) {
+					$function->{$index}{nfssub} .= "$geneidmap->{$seqid}:$seqid:exon$exonpos:$canno,";
+				} else {
+					$function->{$index}{fssub} .= "$geneidmap->{$seqid}:$seqid:exon$exonpos:$canno,";
 					$is_fs++;
 				}
 
-				$canno = "c." . ($refvarstart-$refcdsstart+1) . "_" . ($refvarend-$refcdsstart+1) . "$obs";
-                
 		                # padded
 		                if ($seq_padding) {
 		                    my $real_ref = ($ref eq '-' ? '' : substr($refseqhash->{$seqid}, $refvarstart-1, $refvarend-$refvarstart+1));
@@ -1988,7 +2130,7 @@ sub annotateExonicVariantsThread {
 # Clean the exonic annotation string when it has extra comment that should not be printed out
 sub cleanExonicAnnotation {
 	my ($anno) = @_;
-	$anno =~ s/#\w+#\d+//g;
+	$anno =~ s/#[\w\.\-]+#\d+//g;	#to handle situations where the chromosome name has dot or - sign
 	return $anno;
 }
 
@@ -2144,7 +2286,7 @@ sub filterNextBatchThread {
 	my $bb = {};			#a subset of %index, which corresponds to the input variants
 	my $flag_idx_search = 0;	#indicate if index-based search algorithm is used (faster speed for a small number of input variants)
 	
-	if ($dbm) {
+	if ($dbm) {				#dbm is no longer used in ANNOVAR but we provide it here for backward compatibility, read https://en.wikipedia.org/wiki/DBM_(computing)
 		if (-f "$dbfile.dir" and -f "$dbfile.pag") {
 			if (dbmopen (%index, $dbfile, 0)) {		#read only mode
 				$BIN = $index{BIN} || undef;
@@ -2274,7 +2416,7 @@ sub filterNextBatchThread {
 				if ($chromosome) {
 					$valichr{$chr} or next;
 				}
-				if (defined $score and defined $score_threshold) {
+				if (defined $score and defined $score_threshold and $score=~/\d{1,}\.{0,1}\d{0,}/) {
 					if ($reverse) {
 						$score > $score_threshold and next;
 					} else {
@@ -2356,7 +2498,7 @@ sub filterNextBatchThread {
 					}
 				}
 				$score = $rsid;
-			} elsif ($dbtype =~ m/^1000g_(\w+)/ or $dbtype =~ m/^1000g2010_(\w+)/ or $dbtype =~ m/^1000g201\d\w\w\w_(\w+)/) {	#dbtype1 should NOT be used here
+			} elsif ($dbtype =~ m/^1000g_(\w+)/ or $dbtype =~ m/^1000g2010_(\w+)/ or $dbtype =~ m/^1000g201\d\w\w\w_(\w+)/ or $dbtype1 =~ m/[A-Z][A-Z][A-Z]\.sites.\d{4}_\d{2}/) {	#20191010: since too many users asked about FAQ #4, I decided to just allow this keyword (previously invalid) in command line
 				@record = split (/\t/, $_);
 				@record == 5 or @record == 6 or die "Error: invalid record found in 1000G database file $dbfile (5 or 6 fields expected): <$_>\n";
 				($chr, $start, $ref, $obs, $af) = @record;			#there is no "END" in 1000G input file
@@ -2380,7 +2522,7 @@ sub filterNextBatchThread {
 					}
 				}
 				$score = $af;
-				if (defined $score and defined $score_threshold) {
+				if (defined $score and defined $score_threshold and $score=~/\d{1,}\.{0,1}\d{0,}/) {
 					if ($reverse) {
 						$score > $score_threshold and next;
 					} else {
@@ -2465,7 +2607,7 @@ sub filterNextBatchThread {
 				} elsif ($start != $end or $start==$end and length($obs)>1) {		#block substitution fixed 20130430
 					$obs = ($end-$start+1) . $obs;
 				}
-				if (defined $score and defined $score_threshold) {
+				if (defined $score and defined $score_threshold and $score=~/\d{1,}\.{0,1}\d{0,}/) {
 					if ($reverse) {
 						$score > $score_threshold and next;
 					} else {
@@ -2580,6 +2722,8 @@ sub annotateQueryByRegionThread {
 		($regiondb) = readGFF3RegionAnnotation ();
 	} elsif ($dbtype eq 'bed') {
 		($regiondb) = readBedRegionAnnotation ();
+	} elsif ($dbtype eq 'generic') {
+		($regiondb) = readGenericRegionAnnotation ();
 	} else {
 		($regiondb) = readUCSCRegionAnnotation ();
 	}
@@ -2824,6 +2968,60 @@ sub readBedRegionAnnotation {
 
 		$chr =~ s/^chr//;
 		$start++;										#due to the zero-opening coordinate system in UCSC
+		
+		my $score = '';
+		for my $i (0 .. @colsWanted-1) {
+			defined $record[$colsWanted[$i]-1] and $score ||= ',' . $record[$colsWanted[$i]-1];
+		}
+		$score =~ s/^,//;
+		$score ||= 'NA';
+
+		my ($bin1, $bin2) = (int($start/$genomebinsize), int($end/$genomebinsize));
+		for my $nextbin ($bin1 .. $bin2) {
+			push @{$regiondb{$chr, $nextbin}}, [$start, $end, 0, $score];
+		}
+		$regioncount++;
+		if ($verbose and $dbcount =~ m/000000$/) {
+			my ($availmem, $allmem) = currentAvailMemory();
+			printerr "NOTICE: Current system available memory is $availmem kb (this ANNOVAR program used $allmem kb)\n";
+		}
+	}
+	close (DB);
+	
+	for my $key (keys %regiondb) {						#pre-sort gene DB by txstart to faciliate future use
+		@{$regiondb{$key}} = sort {$a->[0] <=> $b->[0]} @{$regiondb{$key}};
+	}
+	printerr "Done with $regioncount regions\n";
+	return (\%regiondb);
+}
+
+# Read region annotation database stored in ANNOVAR generic files (five column format)
+sub readGenericRegionAnnotation {
+	my ($dbfile);
+	my ($regioncount, $dbcount) = (0, 0);
+	my (@record, %regiondb);
+	my ($chr, $start, $end);
+	
+	$dbfile = File::Spec->catfile ($dbloc, $genericdbfile);
+
+	-f $dbfile or die "Error: required genericdbfile $dbfile does not exists.\n";
+	
+	open (DB, $dbfile) or die "Error: cannot read from database file $dbfile: $!\n";
+	printerr "NOTICE: Reading annotation database $dbfile ... ";
+
+	while (<DB>) {
+		$dbcount++;
+		s/[\r\n]+$//;							#deleting the newline characters
+
+		@record = split (/\t/, $_);
+		
+		($chr, $start, $end) = @record;
+		defined $end or die "Error: invalid record found in BED file (at least 3 tab-delimited records expected): <$_>\n";
+		$start =~ m/^\d+$/ or die "Error: invalid record found in BED file (second column must be a positive integer): <$_>\n";
+		$end =~ m/^\d+$/ or die "Error: invalid record found in BED file (third column must be a positive integer): <$_>\n";
+
+		$chr =~ s/^chr//;
+		#$start++;										#due to the zero-opening coordinate system in UCSC (comment out this line since annovar use 1-based coordinate)
 		
 		my $score = '';
 		for my $i (0 .. @colsWanted-1) {
@@ -3435,21 +3633,21 @@ sub downloadDB {
 	my $count_success;
 	my %monthhash = ('jan'=>'01', 'feb'=>'02', 'mar'=>'03', 'apr'=>'04', 'may'=>'05', 'jun'=>'06', 'jul'=>'07', 'aug'=>'08', 'sep'=>'09', 'oct'=>'10', 'nov'=>'11', 'dec'=>'12');
 	my $mrna_reminder;	#remind users to generate mRNA file
-	if ($dbtype1 eq 'refGene') {
+	if ($dbtype1 =~ m/^refGene/) {		#change refGene to m/^refGene/ so users can download refGeneWithVer as well
 		if ($buildver =~ m/^hg\d+$/ and not $webfrom) {
 			print STDERR "NOTICE: data retrieval from ANNOVAR repository by default\n";
 			$webfrom = 'annovar';
 		}
 		
 		if ($buildver =~ m/^hg\d+$/ and $webfrom eq 'annovar') {
-			push @urlin, "http://www.openbioinformatics.org/annovar/download/${buildver}_refGene.txt.gz";
-			push @urlin, "http://www.openbioinformatics.org/annovar/download/${buildver}_refGeneMrna.fa.gz";
-			push @urlin, "http://www.openbioinformatics.org/annovar/download/${buildver}_refGeneVersion.txt.gz";
+			push @urlin, "http://www.openbioinformatics.org/annovar/download/${buildver}_$dbtype1.txt.gz";
+			push @urlin, "http://www.openbioinformatics.org/annovar/download/${buildver}_${dbtype1}Mrna.fa.gz";
+			$dbtype1 eq 'refGene' and push @urlin, "http://www.openbioinformatics.org/annovar/download/${buildver}_${dbtype1}Version.txt.gz";		#by default, add the version file to download list
 		} else {
 			push @urlin, "http://hgdownload.cse.ucsc.edu/goldenPath/$buildver/database/refGene.txt.gz";
 			$mrna_reminder++;
 		}
-	} elsif ($dbtype1 eq 'knownGene') {
+	} elsif ($dbtype1 =~ m/^knownGene/) {
 		if ($buildver =~ m/^hg\d+$/ and not $webfrom) {
 			print STDERR "NOTICE: data retrieval from ANNOVAR repository by default\n";
 			$webfrom = 'annovar';
@@ -3464,7 +3662,7 @@ sub downloadDB {
 			push @urlin, "http://hgdownload.cse.ucsc.edu/goldenPath/$buildver/database/kgXref.txt.gz";
 			$mrna_reminder++;
 		}		
-	} elsif ($dbtype1 eq 'ensGene') {
+	} elsif ($dbtype1 =~ m/^ensGene/) {
 		if ($buildver =~ m/^hg\d+$/ and not $webfrom) {
 			print STDERR "NOTICE: data retrieval from ANNOVAR repository by default\n";
 			$webfrom = 'annovar';
@@ -3480,6 +3678,7 @@ sub downloadDB {
 	} elsif ($dbtype1 eq 'seq') {
 		push @urlin, "http://hgdownload.cse.ucsc.edu/goldenPath/$buildver/bigZips/chromFa.zip";		#example: hg18, hg19
 		push @urlin, "http://hgdownload.cse.ucsc.edu/goldenPath/$buildver/bigZips/chromFa.tar.gz";	#example: panTro2
+		push @urlin, "http://hgdownload.cse.ucsc.edu/goldenPath/$buildver/bigZips/$buildver.chromFa.tar.gz";	#UCSC changed directory location for hg38, so this line is added July 2016
 		push @urlin, "http://hgdownload.cse.ucsc.edu/goldenPath/$buildver/bigZips/$buildver.fa.gz";	#example: bosTau4
 	} elsif ($dbtype1 eq '1000g' or $dbtype1 eq '1000g2010' or $dbtype1 eq '1000g2010jul') {
 		$buildver eq 'hg18' or die "Error: currently the --dbtype of '$dbtype1' only support --buildver of 'hg18'\n";
@@ -3562,7 +3761,7 @@ sub downloadDB {
 			} elsif ($urlin[$i] =~ m#^ftp://([^\\\/]+)#) {		#for hgdownload.cse.ucsc.edu, ftp-trace.ncbi.nih.gov, ftp.ensembl.org, etc
 				my $urlroot = $1;
 				if ($ftp = Net::FTP->new($urlroot, Timeout=>10, Debug=>$verbose)) {
-					$ftp->login("anonymous", 'anonymous@');
+					$ftp->login("anonymous", 'anonymous@');		#these are the typical username and password for almost all FTP sites that offer public access
 					$ftp->binary();
 					my $url = $urlin[$i];
 					$url =~ s#ftp://[\w\.\-]+/##;		#remove the URL root
@@ -3601,10 +3800,10 @@ sub downloadDB {
 				printerr "ERROR: unzip is not installed in your system.\nPlease manually uncompress the files (@filein) at the $dbloc directory", $dbtype1 eq 'seq'?".\n":", and rename them by adding ${buildver}_ prefix to the file names.\n";
 				exit (101);
 			}
-			unlink ($filein[$i]);				#delete the ZIP file
+			unlink ($filein[$i]);						#delete the ZIP file
 		} elsif ($filein[$i] =~ m/\.tar\.gz$/) {		#panTro2 FASTA sequence is stored as tar.gz rather than zip
-			$msg = qx/tar --help 2>&1/ || '';		#collect the output of the system command
-			if ($msg =~ m/Usage/i or $msg =~ m/Options/i) {	#BSD-derived version of tar on Mac OS does not list "Usage" information
+			$msg = qx/tar --help 2>&1/ || '';			#collect the output of the system command
+			if ($msg =~ m/Usage/i or $msg =~ m/Options/i) {	#BSD-derived version of `tar` on Mac OS does not list "Usage" information (it prints "Option" instead)
 				system ("tar -x -z -f $filein[$i]");
 			} else {
 				printerr "ERROR: tar/gunzip is not installed in your system.\nPlease manually uncompress the files (@filein) at the $dbloc directory", $dbtype1 eq 'seq'?".\n":", and rename them by adding ${buildver}_ prefix to the file names.\n";
@@ -3622,9 +3821,9 @@ sub downloadDB {
 	}
 
 	for my $i (0 .. @fileout-1) {
-		$fail{$i} and next;				#skip the file that failed to be downloaded
+		$fail{$i} and next;							#skip the file that failed to be downloaded
 		my $fileout = $fileout[$i];
-		$dbtype1 eq 'seq' and next;			#the zip file contains dozens of FASTA files so cannot rename them automatically
+		$dbtype1 eq 'seq' and next;					#the zip file contains dozens of FASTA files so cannot rename them automatically
 		if (not $fileout =~ m/^${buildver}_/) {		#if the buildver is not the prefix of the files
 			rename ($fileout, "${buildver}_$fileout") or die "Error: cannot rename $fileout to ${buildver}_$fileout\n";
 			$fileout = "${buildver}_$fileout";
@@ -3733,7 +3932,7 @@ sub checkProgramUpdate {
 				printerr "Cannot access version information\n";
 			} else {
 				printerr "Done\n";
-				@webcontent = <AVDATE>;		#$LAST_CHANGED_DATE =	'$Date: 2016-02-01 00:11:04 -0800 (Mon,  1 Feb 2016) $';
+				@webcontent = <AVDATE>;		#$LAST_CHANGED_DATE =	'$Date: 2020-06-07 23:56:37 -0400 (Sun,  7 Jun 2020) $';
 				close (AVDATE);
 				unlink (".annovar_date");
 			}
@@ -3780,6 +3979,18 @@ sub checkProgramUpdate {
 		}
 		printerr "--------------------------------------------------------------------------\n";
 		printerr "--------------------------------------------------------------------------\n";
+	}
+}
+
+sub hasOverlap {	#deteremine whether two regions have overlaps or not
+	my ($s1, $e1, $s2, $e2) = @_;
+	if ($s1 > $s2) {
+		($s1, $e1, $s2, $e2) = ($s2, $e2, $s1, $e1);
+	}
+	if ($e1 >= $s2) {	#ending of region 1 is more than start of region 2
+		return 1;
+	} else {
+		return 0;
 	}
 }
 
@@ -3858,11 +4069,11 @@ sub checkProgramUpdate {
  
  Example: #download annotation databases from ANNOVAR or UCSC and save to humandb/ directory
  	  annotate_variation.pl -downdb -webfrom annovar refGene humandb/
- 	  annotate_variation.pl -buildver mm9 -downdb refGene mousedb/
- 	  annotate_variation.pl -downdb -webfrom annovar esp6500siv2_all humandb/
+ 	  annotate_variation.pl -downdb -buildver mm9 refGene mousedb/
+ 	  annotate_variation.pl -downdb -buildver hg19 -webfrom annovar esp6500siv2_all humandb/
  	
  	  #gene-based annotation of variants in the varlist file (by default --geneanno is ON)
- 	  annotate_variation.pl -buildver hg19 ex1.avinput humandb/
+ 	  annotate_variation.pl -geneanno -buildver hg19 ex1.avinput humandb/
  	  
  	  #region-based annotate variants
  	  annotate_variation.pl -regionanno -buildver hg19 -dbtype cytoBand ex1.avinput humandb/
@@ -3871,9 +4082,10 @@ sub checkProgramUpdate {
  	  #filter rare or unreported variants (in 1000G/dbSNP) or predicted deleterious variants
  	  annotate_variation.pl -filter -dbtype 1000g2015aug_all -maf 0.01 ex1.avinput humandb/
  	  annotate_variation.pl -filter -buildver hg19 -dbtype snp138 ex1.avinput humandb/
- 	  annotate_variation.pl -filter -dbtype dbnsfp30a -otherinfo ex1.avinput humandb/
+ 	  annotate_variation.pl -filter -dbtype dbnsfp35a -buildver hg38 ex1.avinput humandb/
+ 	  annotate_variation.pl -filter -dbtype gnomad211_exome -buildver hg19 ex1.avinput humandb/
  
- Version: $Date: 2016-02-01 00:11:04 -0800 (Mon,  1 Feb 2016) $
+ Version: $Date: 2020-06-07 23:56:37 -0400 (Sun,  7 Jun 2020) $
 
 =head1 OPTIONS
 
@@ -4335,6 +4547,6 @@ examine this file and identify sources of error.
 
 ANNOVAR is free for academic, personal and non-profit use.
 
-For questions or comments, please contact $Author: Kai Wang <kai@openbioinformatics.org> $. 
+For questions or comments, please contact $Author: Kai Wang <kaichop@gmail.com> $. 
 
 =cut

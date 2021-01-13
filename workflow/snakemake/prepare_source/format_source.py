@@ -7,9 +7,9 @@ import re
 import pandas as pd
 from celery import Celery
 import psycopg2
-sys.path.append(os.path.join(os.getcwd(), '..', '..', 'scripts'))
-sys.path.append(os.path.join(os.getcwd(), '..', 'scripts'))
-sys.path.append(os.path.join(os.getcwd(), 'scripts'))
+sys.path.append(os.path.join(os.getcwd(), '..', '..', 'snakemake'))
+sys.path.append(os.path.join(os.getcwd(), '..', 'snakemake'))
+sys.path.append(os.path.join(os.getcwd(), 'snakemake'))
 from genomics import get_config
 
 

@@ -9,7 +9,7 @@ build = get_config.main("nanoporeReport", "build")
 annovar_script = get_config.main("nanoporeReport", "annovar_script")
 human_db = get_config.main("nanoporeReport", "human_db")
 cwd = os.getcwd()
-project_path = cwd[:cwd.find('build_report') + len('build_report')]
+project_path = cwd[:cwd.find('workflow') + len('workflow')]
 input_dir = os.path.join(project_path, get_config.main("nanoporeReport", "input_root"))
 output_dir = os.path.join(project_path, get_config.main("nanoporeReport", "output_root"))
 vcf_filtered_dir = os.path.join(output_dir, "filtered_vcfs")
@@ -63,11 +63,11 @@ rule get_annotations:  #Replace with snpeff, vcfanno
         vcf=os.path.join(vcf_filtered_dir, "{sample}.reformatted.vcf")
     params:
         build = build,
-        out = os.path.join(annotated_mutations_dir, "{sample}.annotated.vcf"),
+        out = os.path.join(annotated_mutations_dir, "{sample}.annotated"),
         annovar_script = annovar_script,
         human_db = human_db
     output:
-        os.path.join(annotated_mutations_dir, "{sample}.annotated.vcf." + build + "_multianno.vcf")
+        os.path.join(annotated_mutations_dir, "{sample}.annotated." + build + "_multianno.vcf")
     shell:
         "perl {params.annovar_script} "
         "-vcfinput {input.vcf} "
@@ -82,7 +82,7 @@ rule get_annotations:  #Replace with snpeff, vcfanno
 
 rule remove_annovar_outputs:
     input:
-        vcf=os.path.join(annotated_mutations_dir, "{sample}.annotated.vcf." + build + "_multianno.vcf")
+        vcf=os.path.join(annotated_mutations_dir, "{sample}.annotated." + build + "_multianno.vcf")
     output:
         os.path.join(annotated_mutations_dir, "{sample}.annotated.vcf")
     shell:
@@ -96,7 +96,7 @@ rule format_source:
     output:
         os.path.join(final_dir, "{sample}.csv")
     params:
-        script=os.path.join(project_path, 'scripts', 'prepare_source','format_source.py')
+        script=os.path.join(project_path, 'snakemake', 'prepare_source','format_source.py')
     shell:
         "python {params.script} {input.vcf} {input.targets} {output}"
 

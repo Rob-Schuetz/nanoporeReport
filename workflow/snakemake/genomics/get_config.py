@@ -5,12 +5,12 @@ import yaml
 
 def main(section, element):
     cwd = os.getcwd()
-    if cwd.find('build_report') != -1:
-        project_path = cwd[:cwd.find('build_report') + len('build_report')]
+    if cwd.find('workflow') != -1:
+        project_path = cwd[:cwd.find('workflow') + len('workflow')]
         config_path = os.path.join(project_path, 'config', 'config.yaml')
     else:
         project_path = cwd[:cwd.find('nanoporeReport') + len('nanoporeReport')]
-        config_path = os.path.join(project_path, 'build_report', 'config', 'config.yaml')
+        config_path = os.path.join(project_path, 'workflow', 'config', 'config.yaml')
 
     with open(config_path, 'r') as conf:
         cfg = yaml.safe_load(conf)

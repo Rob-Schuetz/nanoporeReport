@@ -1,8 +1,8 @@
 import sys
 import re
 import os
-sys.path.append(os.path.join(os.getcwd(), '..', 'build_report', 'scripts'))
-sys.path.append(os.path.join(os.getcwd(), 'build_report', 'scripts'))
+sys.path.append(os.path.join(os.getcwd(), '..', 'workflow', 'snakemake'))
+sys.path.append(os.path.join(os.getcwd(), 'workflow', 'snakemake'))
 from genomics import get_config
 
 def main(filename):

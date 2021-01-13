@@ -42,7 +42,7 @@ rm TIB_js-jrs-cp_7.8.0_linux_x86_64.run
 
 # Set up SQL tables
 bash /home/ubuntu/jasperserver/ctlscript.sh start
-cd /home/ubuntu/projects/nanoporeReport/build_report/scripts
+cd /home/ubuntu/projects/nanoporeReport/workflow/config
 sudo -S -u postgres PGPASSWORD=postgres /home/ubuntu/jasperserver/postgresql/bin/createdb -p 5432 -h localhost -e nanopore
 sudo -S -u postgres PGPASSWORD=postgres /home/ubuntu/jasperserver/postgresql/bin/psql -U postgres -d nanopore -a -f make_tables.sql
 
@@ -52,11 +52,12 @@ bash js-import.sh --input-key --keystore /home/ubuntu/projects/nanoporeReport/bu
 bash js-import.sh --input-key --keystore /home/ubuntu/projects/nanoporeReport/build_report/jrxml/mystore --storepass storepw --keyalias diagnosticDataEncSecret --keypass mydiagnosticpw
 bash /home/ubuntu/jasperserver/ctlscript.sh restart
 
+# Import report to jasperserver
+python /home/ubuntu/projects/nanoporeReport/jrxml/import_jasper_resources.py
+
 # Install ANNOVAR resources
-cd /home/ubuntu/projects/nanoporeReport/build_report/annovar
+cd /home/ubuntu/projects/nanoporeReport/workflow/annovar
 mkdir humandb
-perl annotate_variation.pl -downdb -buildver hg19 refGene humandb
-# wget http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/hg19_cosmic68.txt.idx
-# wget http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/hg19_cosmic68.txt
-# wget http://www.openbioinformatics.org/annovar/download/hg19_cosmic68.txt
-# annotate_variation.pl -buildver hg19 -downdb -webfrom annovar refGene humandb/
+perl annotate_variation.pl --downdb --buildver hg38 refGene humandb
+perl annotate_variation.pl --buildver hg38 --downdb seq humandb/hg38_seq
+perl retrieve_seq_from_fasta.pl humandb/hg38_refGene.txt --seqdir humandb/hg38_seq/chroms --format refGene --outfile humandb/hg38_refGeneMrna.fa

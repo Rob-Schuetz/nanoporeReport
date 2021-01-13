@@ -9,14 +9,14 @@ import subprocess
 import get_percentage
 from celery import Celery
 from datetime import datetime
-sys.path.append(os.path.join(os.getcwd(), '..', 'build_report', 'scripts'))
-sys.path.append(os.path.join(os.getcwd(), 'build_report', 'scripts'))
+sys.path.append(os.path.join(os.getcwd(), '..', 'workflow', 'snakemake'))
+sys.path.append(os.path.join(os.getcwd(), 'workflow', 'snakemake'))
 from genomics import get_config
 
 app = Flask(__name__)
-app.config["CLIENT_PDF"] = os.path.join(get_config.main("nanoporeReport","project_root"),"build_report/results/final_source")
+app.config["CLIENT_PDF"] = os.path.join(get_config.main("nanoporeReport","project_root"),"workflow/results/final_source")
 app.config["SAMPLE_TARGETS"] = os.path.join(get_config.main("nanoporeReport","project_root"),"src/components/Pages/sample_targets.bed")
-app.config["UPLOAD_FOLDER"] = os.path.join(get_config.main("nanoporeReport","project_root"),"build_report/input")
+app.config["UPLOAD_FOLDER"] = os.path.join(get_config.main("nanoporeReport","project_root"),"workflow/input")
 app.config['CELERY_BROKER_URL'] = "redis://localhost:6379/0"
 app.config['result_backend'] = "redis://localhost:6379/0"
 

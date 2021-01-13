@@ -5,14 +5,14 @@ use Getopt::Long;
 use Pod::Usage;
 use File::Basename;
 
-our $REVISION = '$Revision: 821a3c34bdc49f762edb78de36f1af31ebbbb37f $';
-our $DATE =	'$Date: 2015-12-14 13:51:19 -0800 (Mon, 14 Dec 2015) $';  
-our $AUTHOR =	'$Author: Kai Wang <kai@openbioinformatics.org> $';
+our $REVISION = '$Revision: f98de7f0a9145baca0dd81fa66f8e3db0603abf9 $';
+our $DATE =	'$Date: 2019-10-24 00:05:27 -0400 (Thu, 24 Oct 2019) $';  
+our $AUTHOR =	'$Author: Kai Wang <kaichop@gmail.com> $';
 
 our ($verbose, $help, $man);
 our ($variantfile);
 our ($outfile, $format, $includeinfo, $snpqual, $snppvalue, $coverage, $maxcoverage, $chr, $chrmt, $altcov, $allelicfrac, $fraction, $species, 
-	$filterword, $confraction, $allallele, $withzyg, $comment, $allsample, $genoqual, $varqual, $dbsnpfile, $withfreq, $withfilter, $seqdir, $inssize, $delsize, $subsize, $genefile, $splicing_threshold, $context);
+	$filterword, $confraction, $allallele, $withzyg, $comment, $allsample, $genoqual, $varqual, $dbsnpfile, $withfreq, $withfilter, $seqdir, $inssize, $delsize, $subsize, $genefile, $splicing_threshold, $context, $avsnpfile, $keepindelref);
 
 our %iupac = (R=>'AG', Y=>'CT', S=>'CG', W=>'AT', K=>'GT', M=>'AC', A=>'AA', C=>'CC', G=>'GG', T=>'TT', B=>'CGT', D=>'AGT', H=>'ACT', V=>'ACG', N=>'ACGT', '.'=>'-', '-'=>'-'); ### <<< FOR 5500SOLiD LifeScope ( S=>'GC' is replaced by S=>'CG')
 our %iupacrev = reverse %iupac; ### <<< FOR 5500SOLiD LifeScope
@@ -23,7 +23,7 @@ GetOptions('verbose|v'=>\$verbose, 'help|h'=>\$help, 'man|m'=>\$man, 'outfile=s'
 	'species'=>\$species, 'filter=s'=>\$filterword, 'confraction=f'=>\$confraction, 'allallele!'=>\$allallele, 'withzyg'=>\$withzyg,
 	'comment'=>\$comment, 'allsample'=>\$allsample, 'genoqual=f'=>\$genoqual, 'varqual=f'=>\$varqual, 'dbsnpfile=s'=>\$dbsnpfile, 'withfreq'=>\$withfreq,
 	'withfilter'=>\$withfilter, 'seqdir=s'=>\$seqdir, 'inssize=i'=>\$inssize, 'delsize=i'=>\$delsize, 'subsize=i'=>\$subsize, 'genefile=s'=>\$genefile,
-	'splicing_threshold=i'=>\$splicing_threshold, 'context'=>\$context) or pod2usage ();
+	'splicing_threshold=i'=>\$splicing_threshold, 'context'=>\$context, 'avsnpfile=s'=>\$avsnpfile, 'keepindelref'=>\$keepindelref) or pod2usage ();
 
 $help and pod2usage (-verbose=>1, -exitval=>1, -output=>\*STDOUT);
 $man and pod2usage (-verbose=>2, -exitval=>1, -output=>\*STDOUT);
@@ -133,8 +133,12 @@ if ($format eq 'pileup') {
 } elsif ($format eq 'bed') {
 	convertBED ($variantfile);
 } elsif ($format eq 'rsid') {
-	defined $dbsnpfile or pod2usage ("Error in argument: please specify --dbsnpfile when the --format is 'rsid'");
-	convertRsid ($variantfile);
+	defined $dbsnpfile or defined $avsnpfile or pod2usage ("Error in argument: please specify --dbsnpfile or -avsnpfile when the --format is 'rsid'");
+	if (defined $dbsnpfile) {
+		convertRsid ($variantfile);
+	} else {
+		convertAvsnpid ($variantfile);
+	}
 } elsif ($format eq 'region') {
 	defined $subsize or $subsize = 1;
 	$variantfile =~ m/(chr)?(\w+):(\d+)-(\d+)$/ or pod2usage "Error in argument: for '-format region', the region should be specified in 'chr:start-end' format";
@@ -142,8 +146,8 @@ if ($format eq 'pileup') {
 	convertRegion ($variantfile);
 } elsif ($format eq 'transcript') {
 	defined $subsize or $subsize = 1;
-	defined $genefile or pod2usage ("Error in argument; please specify -genefile for the '-format region'");
-	$seqdir or pod2usage "Error in argument: please specify -seqdir for the '-format region'\n";
+	defined $genefile or pod2usage ("Error in argument; please specify -genefile for the '-format transcript'");
+	$seqdir or pod2usage "Error in argument: please specify -seqdir for the '-format transcript'\n";
 	$splicing_threshold ||= 2;
 	convertTranscript ($variantfile);
 } else {
@@ -998,6 +1002,28 @@ sub convertSOAP {
 		$countvar++;
 	}
 	print STDERR "NOTICE: Read $countline lines and wrote $countvar variants\n";
+}
+
+sub convertAvsnpid {
+	my ($variantfile) = @_;
+	my (%info, @rsid);
+	open(VAR, $variantfile) or die "Error: cannot read from variant file $variantfile: $!\n";
+	while (<VAR>) {
+		s/[\r\n]+$//;
+		m/^(rs\d+)\s*(.*)/ or next;
+		$info{$1} = $2;
+		push @rsid, $1;
+	}
+	close (VAR);
+	open(AVSNP, $avsnpfile) or die "Error: cannot read from avsnpfile $avsnpfile: $!\n";
+	while (<AVSNP>) {
+		s/[\r\n]+$//;
+		if (m/(rs\d+)$/) {
+			if (exists $info{$1}) {
+				print $_, "\n";
+			}
+		}
+	}
 }
 
 sub convertRsid {
@@ -2236,6 +2262,7 @@ sub convertVCF4 {
 				if (defined $gtpos) {
 					#$sampleinfo[$gtpos] eq '0' and next;		#commented out 20150623 note that MuTect may generate "0" as genotype in the VCF file
 					my ($a1, $a2);
+					defined $sampleinfo[$gtpos] or warn "WARNING: genotype not found for gtpos=$gtpos sampleinfo=$sample[$j] in the line <$chr, $start, $ID, $ref, $alt>" and next;
 					if ($sampleinfo[$gtpos] =~ m/([\d\.]+)[\/\|]([\d\.]+)/) {
 						($a1, $a2) = ($1, $2);
 					} elsif ($sampleinfo[$gtpos] =~ m/^([\d\.]+)$/) {	#chrX or chrY variants
@@ -2247,13 +2274,14 @@ sub convertVCF4 {
 					}
 					
 				
+					$a1 eq '.' or $count_all += 1;
+					$a2 eq '.' or $count_all += 1;		#consider . and 0 separately, so that . is not used in the count_all calculation
 					
 					$a1 eq '.' and $a1 = 0;
 					$a2 eq '.' and $a2 = 0;			#CG VCF files have many records as "." probably denoting unknown alleles
 					
-					if ($a1 eq '0' and $a2 eq '0') {
-						$count_all += 2;
-										
+					if ($a1 eq '0' and $a2 eq '0') {	#ref/ref call or unknown call
+						#$count_all += 2;	#commented out 20170328
 						if (not $allsample or not $withfreq) {
 							next;					#no mutation found in this sample so go to next one (but when -allsample and -withfreq is set, this mutation must be printed out)
 						}
@@ -2263,7 +2291,7 @@ sub convertVCF4 {
 								next;		#this genotype does not have this alternative allele
 							}
 						}
-						$count_all += 2;
+						#$count_all += 2;	#commented out 20170328
 						$count_alt += 2;
 						$zygosity = 'hom';
 						$counthom++;
@@ -2274,7 +2302,7 @@ sub convertVCF4 {
 							}
 						}
 						$count_alt += 1;
-						$count_all += 2;
+						#$count_all += 2;	#commented out 20170328
 						$zygosity = 'het';
 						$counthet++;
 					}
@@ -2365,40 +2393,51 @@ sub convertVCF4 {
 					($newref, $newalt) = ($ref, $alt);
 					
 				} elsif (length ($ref) > length ($alt)) {		#deletion or block substitution
-					$head = substr ($ref, 0, length ($alt));
-					if ($head eq $alt) {
-						($newstart, $newend) = ($start+length ($head), $start + length ($ref)-1);
-						($newref, $newalt) = (substr($ref, length($alt)), '-');
+					if ($keepindelref) {
+						($newstart, $newend, $newref, $newalt) = ($start, $start+length($ref)-1, $ref, $alt);
 					} else {
-						($newstart, $newend) = ($start, $start+length($ref)-1);		#changed to length(ref) on 20130820
-						($newref, $newalt) = ($ref, $alt);
+						$head = substr ($ref, 0, length ($alt));
+						if ($head eq $alt) {
+							($newstart, $newend) = ($start+length ($head), $start + length ($ref)-1);
+							($newref, $newalt) = (substr($ref, length($alt)), '-');
+						} else {
+							($newstart, $newend) = ($start, $start+length($ref)-1);		#changed to length(ref) on 20130820
+							($newref, $newalt) = ($ref, $alt);
+						}
+						
+						($newstart, $newend, $newref, $newalt) = adjustStartEndRefAlt ($newstart, $newend, $newref, $newalt);	#20150324: further adjust when only part of alt and ref matches
 					}
-					
-					($newstart, $newend, $newref, $newalt) = adjustStartEndRefAlt ($newstart, $newend, $newref, $newalt);	#20150324: further adjust when only part of alt and ref matches
 				} elsif (length ($ref) < length ($alt)) {		#insertion or block substitution
-					$head = substr ($alt, 0, length ($ref));
-					if ($head eq $ref) {
-						($newstart, $newend) = ($start+length($ref)-1, $start+length($ref)-1);
-						($newref, $newalt) = ('-', substr($alt, length($ref)));
+					if ($keepindelref) {
+						($newstart, $newend, $newref, $newalt) = ($start, $start+length($ref)-1, $ref, $alt);
 					} else {
-						($newstart, $newend) = ($start, $start+length($ref)-1);
-						($newref, $newalt) = ($ref, $alt);
+						$head = substr ($alt, 0, length ($ref));
+						if ($head eq $ref) {
+							($newstart, $newend) = ($start+length($ref)-1, $start+length($ref)-1);
+							($newref, $newalt) = ('-', substr($alt, length($ref)));
+						} else {
+							($newstart, $newend) = ($start, $start+length($ref)-1);
+							($newref, $newalt) = ($ref, $alt);
+						}
+						
+						($newstart, $newend, $newref, $newalt) = adjustStartEndRefAlt ($newstart, $newend, $newref, $newalt);	#20150324: further adjust when only part of alt and ref matches
 					}
-					
-					($newstart, $newend, $newref, $newalt) = adjustStartEndRefAlt ($newstart, $newend, $newref, $newalt);	#20150324: further adjust when only part of alt and ref matches
 				} else {                #block substitution (only differing in the last base)
-                                        $head = substr ($ref, 0, length ($ref) - 1);
-					if ($alt =~ /^$head/) {
-						($newstart, $newend) = ($start+length($ref)-1, $start+length($ref)-1);
-						my $chopped_ref = $ref;
-						($newref, $newalt) = (chop $chopped_ref, chop $alt);
+					if ($keepindelref) {
+						($newstart, $newend, $newref, $newalt) = ($start, $start+length($ref)-1, $ref, $alt);
 					} else {
-						($newstart, $newend) = ($start, $start+length($ref)-1);
-						($newref, $newalt) = ($ref, $alt);
+	                	$head = substr ($ref, 0, length ($ref) - 1);
+						if ($alt =~ /^$head/) {
+							($newstart, $newend) = ($start+length($ref)-1, $start+length($ref)-1);
+							my $chopped_ref = $ref;
+							($newref, $newalt) = (chop $chopped_ref, chop $alt);
+						} else {
+							($newstart, $newend) = ($start, $start+length($ref)-1);
+							($newref, $newalt) = ($ref, $alt);
+						}
+						
+						($newstart, $newend, $newref, $newalt) = adjustStartEndRefAlt ($newstart, $newend, $newref, $newalt);	#20150324: further adjust when only part of alt and ref matches
 					}
-					
-					($newstart, $newend, $newref, $newalt) = adjustStartEndRefAlt ($newstart, $newend, $newref, $newalt);	#20150324: further adjust when only part of alt and ref matches
-					
 				}
 				
 				if ($includeinfo) {
@@ -2446,6 +2485,7 @@ sub convertVCF4 {
 			if ($withfreq) {
 				my $fhout = $fhout[0];
 				my $freq = $count_all?($count_alt/$count_all):'.';
+				$newalt ||= 0;		#this is to handle GATK haplotype caller that sometimes have ALT allele as "."
 				length ($freq) > 6 and $freq = sprintf("%.4g", $freq);
 				if ($includeinfo) {
 					print $fhout join ("\t", $chr, $newstart, $newend, $newref, $newalt, $freq, $quality_score, $read_depth, $_), "\n";
@@ -2487,31 +2527,38 @@ sub convertVCF4 {
         -m, --man                       print complete documentation
         -v, --verbose                   use verbose output
             --format <string>		input format (default: pileup)
+            --includeinfo		include supporting information in output
             --outfile <file>		output file name (default: STDOUT)
             --snpqual <float>		quality score threshold in pileup file (default: 20)
             --snppvalue <float>		SNP P-value threshold in GFF3-SOLiD file (default: 1)
             --coverage <int>		read coverage threshold in pileup file (default: 0)
             --maxcoverage <int>		maximum coverage threshold (default: none)
-            --includeinfo		include supporting information in output
             --chr <string>		specify the chromosome (for CASAVA format)
             --chrmt <string>		chr identifier for mitochondria (default: M)
+            --fraction <float>		minimum allelic fraction to claim a mutation (for pileup format)
             --altcov <int>		alternative allele coverage threshold (for pileup format)
             --allelicfrac		print out allelic fraction rather than het/hom status (for pileup format)
-            --fraction <float>		minimum allelic fraction to claim a mutation (for pileup format)
             --species <string>		if human, convert chr23/24/25 to X/Y/M (for gff3-solid format)
             --filter <string>		output variants with this filter (case insensitive, for vcf4 format)
-            --allsample			process all samples in file with separate output files (for vcf4 format)
+            --confraction <float>	minimal fraction for two indel calls as a 0-1 value (for vcf4old format)
+            --allallele			print all alleles rather than first one (for vcf4old format)
             --withzyg			print zygosity/coverage/quality when -includeinfo is used (for vcf4 format)
+            --comment			keep comment line in output (for vcf4 format)
+            --allsample			process all samples in file with separate output files (for vcf4 format)
             --genoqual <float>		genotype quality score threshold (for vcf4 format)
             --varqual <float>		variant quality score threshold (for vcf4 format)
-            --comment			keep comment line in output (for vcf4 format)
             --dbsnpfile <file>		dbSNP file in UCSC format (for rsid format)
             --withfreq			for --allsample, print frequency information instead (for vcf4 format)
+            --withfilter		print filter information in output (for vcf4 format)
             --seqdir <string>		directory with FASTA sequences (for region format)
             --inssize <int>		insertion size (for region format)
             --delsize <int>		deletion size (for region format)
             --subsize <int>		substitution size (default: 1, for region format)
+            --genefile <file>		specify the gene file from UCSC (for transcript format)
+            --splicing_threshold <int>	the splicing threshold (for transcript format)
             --context <int>		print context nucleotide for indels (for casava format)
+            --avsnpfile <file>		specify the avSNP file (for rsid format)
+            --keepindelref		keep Ref/Alt alleles for indels (for vcf4 format)
 
  Function: convert variant call file generated from various software programs 
  into ANNOVAR input format
@@ -2530,7 +2577,7 @@ sub convertVCF4 {
           convert2annovar.pl -format region -seqdir humandb/hg19_seq/ chr1:2000001-2000003 -inssize 1 -delsize 2
           convert2annovar.pl -format transcript NM_022162 -gene humandb/hg19_refGene.txt -seqdir humandb/hg19_seq/
 
- Version: $Date: 2015-12-14 13:51:19 -0800 (Mon, 14 Dec 2015) $
+ Version: $Date: 2019-10-24 00:05:27 -0400 (Thu, 24 Oct 2019) $
 
 =head1 OPTIONS
 
@@ -2648,6 +2695,65 @@ in VCF file.
 =item B<--comment>
 
 include VCF4 header comment lines in the output file
+
+=item B<--genoqual>
+
+specify the genotype quality score to be included in the output file
+
+=item B<--varqual>
+
+specify the variant quality score to be included in the output file
+
+=item B<--dbsnpfile>
+
+specify the dbSNP file to query (for rsid format)
+
+=item B<--withfreq>
+
+include frequency information in the output (for VCF format with multiple
+samples)
+
+=item B<--withfilter>
+
+include filter information in the output file (for VCF format)
+
+=item B<--seqdir>
+
+specify the directory for sequence file (for region format)
+
+=item B<--inssize>
+
+specify the insertion size when generating all mutations (for region format)
+
+=item B<--delsize>
+
+specify the deletion size when generating all mutations (for region format)
+
+=item B<--subsize>
+
+specify the substitution size when generating all mutations (for region format)
+
+=item B<--genefile>
+
+specify the gene file from UCSC, which can be refGene, knownGene or ensGene (for
+transcript format)
+
+=item B<--splicing_threshold>
+
+specify the splicing threshold (for transcript format)
+
+=item B<--context>
+
+print context for indels which is useful to convert to VCF files (for CASAVA format)
+
+=item B<--avsnpfile>
+
+specify the avsnpfile that will be queried when using rsid as the input file format
+
+=item B<--keepindelref>
+
+do not alter the Ref and Alt alleles for indels in the VCF file (by default the
+program automatically changes and shortens the Ref and Alt allele)
 
 =back
 

@@ -6,8 +6,8 @@ use Getopt::Long;
 use File::Copy;
 use File::Basename;
 
-our $REVISION = '$Revision: 871849c7dd7b3842a6f3acecc3ce47beb5e1e920 $';
-our $DATE =	'$Date: 2015-12-14 13:51:19 -0800 (Mon, 14 Dec 2015) $';  
+our $REVISION = '$Revision: a64f71073be44e295d1363669de039bd6ca0bebd $';
+our $DATE =	'$Date: 2019-10-24 00:05:28 -0400 (Thu, 24 Oct 2019) $';  
 our $AUTHOR =	'$Author: Kai Wang <kai@openbioinformatics.org> $';
 
 our ($verbose, $help, $man);
@@ -37,17 +37,8 @@ $path and $ENV{PATH} = "$path:$ENV{PATH}";		#set up the system executable path t
 
 $outfile ||= $queryfile;
 $genetype ||= 'refgene';
-$genetype =~ m/^refgene|knowngene|ensgene|gencodegene$/i or $genetype =~ m/wgEncodeGencode\w+$/ or pod2usage ("Error in argument: the --genetype can be 'refgene', 'knowngene', 'ensgene' or 'gencodegene' only");
+$genetype =~ m/^refgene|knowngene|ensgene$/i or pod2usage ("Error in argument: the --genetype can be 'refgene', 'knowngene' or 'ensgene' only");	#20190509: I deleted gencodegene since ensGene is now the gencodegene
 
-if ($genetype eq 'gencodegene') {
-	if ($buildver eq 'hg18') {
-		$genetype = 'wgEncodeGencodeManualV3';	#this is very outdated now, but kept here for backward compatibility
-		print STDERR "WARNING: the --genetype argument is set to wgEncodeGencodeManualV3 by default\n";
-	} elsif ($buildver eq 'hg19') {
-		$genetype = 'wgEncodeGencodeManualV4';	#this is very outdated now, but kept here for backward compatibility
-		print STDERR "WARNING: the --genetype argument is set to wgEncodeGencodeManualV4 by default\n";
-	}
-}
 
 if (not defined $buildver) {
 	$buildver = 'hg18';
@@ -242,7 +233,7 @@ sub filterOperation {
 	}
 	
 	if (defined $aaf_threshold) {
-		if ($dbtype =~ m/^1000g/ or $dbtype =~ m/^esp\d+/ or $dbtype =~ m/^cg\d+/ or $dbtype =~ m/^exac\d+/) {
+		if ($dbtype =~ m/^1000g/ or $dbtype =~ m/^esp\d+/ or $dbtype =~ m/^cg\d+/ or $dbtype =~ m/^exac\d+/ or $dbtype =~ m/^gnomad/) {
 			$sc .= " -score_threshold $aaf_threshold";
 		}
 	}
@@ -275,7 +266,7 @@ sub modelOperation {
 	$sc .= "cut -f 3- $outfile.step$step.varlist > $outfile.step$step.temp;";			#list of all avinput
 	$sc .= "fgrep -v -f $outfile.step$step.temp $infile > $outfile.step$step.temp1;";		#list of splicing variants
 	$sc .= "fgrep -f $outfile.step$step.temp1 $outfile.step1.variant_function | fgrep splicing >> $outfile.step$step.varlist;";	#adding splicing variants to nonsyn variants
-	print STDERR "\nNOTICE: Running step 8 with system command <$sc>\n";
+	print STDERR "\nNOTICE: Running step $step with system command <$sc>\n";
 	system ($sc);			#this command may generate error, because the $outfile.step8.temp1 file may be empty
 
 	$remove and unlink ("$outfile.step$step.temp", "$outfile.step$step.temp1", "$outfile.step1.exonic_variant_function");
@@ -387,7 +378,7 @@ sub checkFileExistence {
  
  Example: variants_reduction.pl sample.avinput humandb/ -protocol nonsyn_splicing,genomicSuperDups,phastConsElements46way,1000g2012apr_all,esp5400_ea,esp5400_aa,snp135NonFlagged,dominant -operation g,rr,r,f,f,f,f,m -out reduce -buildver hg19
                   
- Version: $Date: 2015-12-14 13:51:19 -0800 (Mon, 14 Dec 2015) $
+ Version: $Date: 2019-10-24 00:05:28 -0400 (Thu, 24 Oct 2019) $
 
 =head1 OPTIONS
 
