@@ -14,7 +14,7 @@ else
 fi
 
 export PATH=$PATH:/home/ubuntu/miniconda3/bin/
-conda env create -n nanoporeReport -f nanoporeReport_environment.yml
+conda env create -n nanoporeReport -f conda_environment.yml
 
 
 # Ensure Node.js is installed
@@ -40,12 +40,17 @@ TIB_js-jrs-cp_7.8.0_linux_x86_64.run
 rm Miniconda3-latest-Linux-x86_64.sh
 rm TIB_js-jrs-cp_7.8.0_linux_x86_64.run
 
-
 # Set up SQL tables
 bash /home/ubuntu/jasperserver/ctlscript.sh start
 cd /home/ubuntu/projects/nanoporeReport/build_report/scripts
 sudo -S -u postgres PGPASSWORD=postgres /home/ubuntu/jasperserver/postgresql/bin/createdb -p 5432 -h localhost -e nanopore
 sudo -S -u postgres PGPASSWORD=postgres /home/ubuntu/jasperserver/postgresql/bin/psql -U postgres -d nanopore -a -f make_tables.sql
+
+# Import jasperserver keys
+cd /home/ubuntu/jasperserver/buildomatic
+bash js-import.sh --input-key --keystore /home/ubuntu/projects/nanoporeReport/build_report/jrxml/mystore --storepass storepw --keyalias importExportEncSecret --keypass myimportexportpw
+bash js-import.sh --input-key --keystore /home/ubuntu/projects/nanoporeReport/build_report/jrxml/mystore --storepass storepw --keyalias diagnosticDataEncSecret --keypass mydiagnosticpw
+bash /home/ubuntu/jasperserver/ctlscript.sh restart
 
 # Install ANNOVAR resources
 cd /home/ubuntu/projects/nanoporeReport/build_report/annovar
