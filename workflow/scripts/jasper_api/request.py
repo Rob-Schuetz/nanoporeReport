@@ -1,10 +1,16 @@
 import sys
 import os
 import requests
-sys.path.append(os.path.join(os.getcwd(), '..', '..', 'snakemake'))
-sys.path.append(os.path.join(os.getcwd(), '..', 'snakemake'))
-sys.path.append(os.path.join(os.getcwd(), 'snakemake'))
-from genomics import get_config
+import yaml
+
+# Import config files
+config_file_paths = [os.path.join(os.path.realpath('..'), 'config', 'config.yml')]
+config = {}
+for cf in config_file_paths:
+    f = open(cf,'r')
+    conf = yaml.load(f, Loader=yaml.FullLoader)
+    config.update(conf)
+    f.close()
 
 
 def format_cookie(cookie, hostname):
@@ -22,14 +28,14 @@ def main(output):
 
     # SET URLS
 
-    hostname = get_config.main("jasperserver", "hostname")
-    port = get_config.main("jasperserver", "port")
+    hostname = config["jasperserver"]["hostname"]
+    port = config["jasperserver"]["port"]
     root = os.path.join('http://' + str(hostname) + ':' + str(port) + '/jasperserver/rest_v2/')
 
     req_dict = {'urls': [
-        {'name': 'auth', 'url': os.path.join(root, 'login'), 'headers': {"j_username": get_config.main("jasperserver", "username"), "j_password": get_config.main("jasperserver", "password")}, 'method': 'post'},
+        {'name': 'auth', 'url': os.path.join(root, 'login'), 'headers': {"j_username": config["jasperserver"]["username"], "j_password": config["jasperserver"]["password"]}, 'method': 'post'},
         {'name': 'server', 'url': os.path.join(root, 'serverInfo'), 'headers': {}, 'method': 'get' },
-        {'name': 'run', 'url': os.path.join(root, get_config.main("jasperserver", "report_path")), 'headers': {}, 'method': 'get' }
+        {'name': 'run', 'url': os.path.join(root, config["jasperserver"]["report_path"]), 'headers': {}, 'method': 'get' }
         ]}
 
 

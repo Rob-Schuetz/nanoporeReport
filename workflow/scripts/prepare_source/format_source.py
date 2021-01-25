@@ -7,10 +7,16 @@ import re
 import pandas as pd
 from celery import Celery
 import psycopg2
-sys.path.append(os.path.join(os.getcwd(), '..', '..', 'snakemake'))
-sys.path.append(os.path.join(os.getcwd(), '..', 'snakemake'))
-sys.path.append(os.path.join(os.getcwd(), 'snakemake'))
-from genomics import get_config
+import yaml
+
+# Import config files
+config_file_paths = [os.path.join(os.path.realpath('..'), 'config', 'config.yml')]
+config = {}
+for cf in config_file_paths:
+    f = open(cf,'r')
+    conf = yaml.load(f, Loader=yaml.FullLoader)
+    config.update(conf)
+    f.close()
 
 
 def get_sample(path):
@@ -111,11 +117,11 @@ def main(vcf_file, target_file, output):
 
     # ADD INPUT FILES TO DB
     conn_dict = {
-        'host': get_config.main("database", "hostname"),
-        'port': get_config.main("database", "port"),
-        'user': get_config.main("database", "username"),
-        'password': get_config.main("database", "password"),
-        'database': get_config.main("database", "db")
+        'host': config['database']['hostname'],
+        'port': config['database']['port'],
+        'user': config['database']['username'],
+        'password': config['database']['password'],
+        'database': config['database']['db']
     }
 
     # ADD VCF TO RESULTS TABLE
@@ -123,12 +129,12 @@ def main(vcf_file, target_file, output):
     try:
 
         conn = psycopg2.connect(**conn_dict)
-        delete_command = "DELETE FROM %s where 1=1;"%(get_config.main("database", "vcf_table"))
+        delete_command = "DELETE FROM %s where 1=1;"%(config["database"]["vcf_table"])
         execute_sql(conn, delete_command)
 
         # Inserting each row
         for i, row in vcf_df.iterrows():
-            query = "INSERT into %s values ('%s', '%s', %s, %s, '%s', '%s', %s, %s, '%s', '%s');"%(get_config.main("database", "vcf_table"), row['sample'], row['chrom'], row['pos-1'], row['pos'], row['ref'], row['alt'], row['VAF'], row['depth'], row['gene'], row['gene_func'])
+            query = "INSERT into %s values ('%s', '%s', %s, %s, '%s', '%s', %s, %s, '%s', '%s');"%(config["database"]["vcf_table"], row['sample'], row['chrom'], row['pos-1'], row['pos'], row['ref'], row['alt'], row['VAF'], row['depth'], row['gene'], row['gene_func'])
             execute_sql(conn, query)
         conn.close()
 
@@ -145,7 +151,7 @@ def main(vcf_file, target_file, output):
 
         # Inserting each row
         for i, row in vcf_df.iterrows():
-            query = "INSERT into %s values ('%s', '%s', %s, %s, '%s', '%s', %s, %s, '%s', '%s');"%(get_config.main("database", "all_pass_table"), row['sample'], row['chrom'], row['pos-1'], row['pos'], row['ref'], row['alt'], row['VAF'], row['depth'], row['gene'], row['gene_func'])
+            query = "INSERT into %s values ('%s', '%s', %s, %s, '%s', '%s', %s, %s, '%s', '%s');"%(config["database"]["all_pass_table"], row['sample'], row['chrom'], row['pos-1'], row['pos'], row['ref'], row['alt'], row['VAF'], row['depth'], row['gene'], row['gene_func'])
             execute_sql(conn, query)
         conn.close()
 
@@ -161,12 +167,12 @@ def main(vcf_file, target_file, output):
     try:
 
         conn = psycopg2.connect(**conn_dict)
-        delete_command = "DELETE FROM %s where 1=1;"%(get_config.main("database", "target_table"))
+        delete_command = "DELETE FROM %s where 1=1;"%(config["database"]["target_table"])
         execute_sql(conn, delete_command)
 
         # Inserting each row
         for i, row in target_df.iterrows():
-            query = "INSERT into %s values ('%s', '%s', %s, %s, '%s');"%(get_config.main("database", "target_table"), sample_name, row[0], row[1], row[2], row[3])
+            query = "INSERT into %s values ('%s', '%s', %s, %s, '%s');"%(config["database"]["target_table"], sample_name, row[0], row[1], row[2], row[3])
             execute_sql(conn, query)
         conn.close()
         

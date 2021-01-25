@@ -1,12 +1,20 @@
 import sys
 import re
 import os
-sys.path.append(os.path.join(os.getcwd(), '..', 'workflow', 'snakemake'))
-sys.path.append(os.path.join(os.getcwd(), 'workflow', 'snakemake'))
-from genomics import get_config
+import yaml
+
+# Import config files
+config_file_paths = [os.path.join(os.path.realpath('..'),'config', 'config.yml')]
+config = {}
+for cf in config_file_paths:
+    f = open(cf,'r')
+    conf = yaml.load(f, Loader=yaml.FullLoader)
+    config.update(conf)
+    f.close()
+
 
 def main(filename):
-    path = os.path.join(get_config.main("flaskAPI", "log_dir"), filename)
+    path = os.path.join(config["flaskAPI"]["log_dir"], filename)
     with open(path, 'r') as f:
         percentage = 0
         for line in f:

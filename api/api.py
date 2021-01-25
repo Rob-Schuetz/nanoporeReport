@@ -9,14 +9,23 @@ import subprocess
 import get_percentage
 from celery import Celery
 from datetime import datetime
-sys.path.append(os.path.join(os.getcwd(), '..', 'workflow', 'snakemake'))
-sys.path.append(os.path.join(os.getcwd(), 'workflow', 'snakemake'))
-from genomics import get_config
+import yaml
 
+
+# Import config files
+config_file_paths = [os.path.join(os.path.realpath('..'),'config', 'config.yml')]
+config = {}
+for cf in config_file_paths:
+    f = open(cf,'r')
+    conf = yaml.load(f, Loader=yaml.FullLoader)
+    config.update(conf)
+    f.close()
+
+# Initialize Flask
 app = Flask(__name__)
-app.config["CLIENT_PDF"] = os.path.join(get_config.main("nanoporeReport","project_root"),"workflow/results/final_source")
-app.config["SAMPLE_TARGETS"] = os.path.join(get_config.main("nanoporeReport","project_root"),"src/components/Pages/sample_targets.bed")
-app.config["UPLOAD_FOLDER"] = os.path.join(get_config.main("nanoporeReport","project_root"),"workflow/input")
+app.config["CLIENT_PDF"] = os.path.join(config["project_root"], "workflow", "results", "final_source")
+app.config["SAMPLE_TARGETS"] = os.path.join(config["project_root"], "src", "components", "Pages", "sample_targets.bed")
+app.config["UPLOAD_FOLDER"] = os.path.join(config["project_root"], "workflow", "input")
 app.config['CELERY_BROKER_URL'] = "redis://localhost:6379/0"
 app.config['result_backend'] = "redis://localhost:6379/0"
 
@@ -35,13 +44,13 @@ def run_snakemake(self, my_id):
     self.update_state(state='IN PROGRESS')
 
     # Run Snakemake
-    command = ['bash', get_config.main("flaskAPI", "sub_command")]
-    os.chdir(os.path.dirname(get_config.main("flaskAPI", "sub_command")))
+    command = ['bash', config['flaskAPI']["sub_command"]]
+    os.chdir(os.path.dirname(config["flaskAPI"]["sub_command"]))
 
-    if not os.path.exists(get_config.main("flaskAPI", "log_dir")):
-        os.mkdir(get_config.main("flaskAPI", "log_dir"))
+    if not os.path.exists(config["flaskAPI"]["log_dir"]):
+        os.mkdir(config["flaskAPI"]["log_dir"])
 
-    with open(os.path.join(get_config.main("flaskAPI", "log_dir"), my_id + '.txt'), 'w') as f:
+    with open(os.path.join(config["flaskAPI"]["log_dir"], my_id + '.txt'), 'w') as f:
         process = subprocess.run(command, stderr=f)
 
 

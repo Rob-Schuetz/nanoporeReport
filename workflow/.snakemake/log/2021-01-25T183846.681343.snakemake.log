@@ -1,0 +1,4 @@
+The flag 'temp' used in rule filter_pass_only is only valid for outputs, not inputs.
+NameError in line 73 of /home/ubuntu/projects/nanoporeReport/workflow/Snakefile:
+name 'build' is not defined
+  File "/home/ubuntu/projects/nanoporeReport/workflow/Snakefile", line 73, in <module>

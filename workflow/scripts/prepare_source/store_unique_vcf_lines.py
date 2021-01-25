@@ -4,10 +4,16 @@ import os
 import re
 import pandas as pd
 import psycopg2
-sys.path.append(os.path.join(os.getcwd(), '..', '..', 'snakemake'))
-sys.path.append(os.path.join(os.getcwd(), '..', 'snakemake'))
-sys.path.append(os.path.join(os.getcwd(), 'snakemake'))
-from genomics import get_config
+import yaml
+
+# Import config files
+config_file_paths = [os.path.join(os.path.realpath('..'), 'config', 'config.yml')]
+config = {}
+for cf in config_file_paths:
+    f = open(cf,'r')
+    conf = yaml.load(f, Loader=yaml.FullLoader)
+    config.update(conf)
+    f.close()
 
 
 def get_sample(path):
@@ -63,23 +69,23 @@ def main(input_file, output):
 
     # ADD INPUT FILES TO DB
     conn_dict = {
-        'host': get_config.main("database", "hostname"),
-        'port': get_config.main("database", "port"),
-        'user': get_config.main("database", "username"),
-        'password': get_config.main("database", "password"),
-        'database': get_config.main("database", "db")
+        'host': config['database']['hostname'],
+        'port': config['database']['port'],
+        'user': config['database']['username'],
+        'password': config['database']['password'],
+        'database': config['database']['db']
     }
 
     # ADD VCF TO RESULTS TABLE
 
     try:
         conn = psycopg2.connect(**conn_dict)
-        delete_command = "DELETE FROM %s where 1=1;"%(get_config.main("database", "unique_vcf_rows"))
+        delete_command = "DELETE FROM %s where 1=1;"%(config["database"]["unique_vcf_rows"])
         execute_sql(conn, delete_command)
 
         # Inserting each row
         for i, row in df.iterrows():
-            query = "INSERT into %s values ('%s', '%s', %s);"%(get_config.main("database", "unique_vcf_rows"), row['sample'], row['chrom'], row['pos'])
+            query = "INSERT into %s values ('%s', '%s', %s);"%(config["database"]["unique_vcf_rows"], row['sample'], row['chrom'], row['pos'])
             execute_sql(conn, query)
         conn.close()
 

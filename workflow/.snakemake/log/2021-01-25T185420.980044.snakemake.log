@@ -1,0 +1,157 @@
+The flag 'temp' used in rule filter_pass_only is only valid for outputs, not inputs.
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 4
+Rules claiming more threads will be scaled down.
+Job counts:
+	count	jobs
+	1	all
+	1	filter_pass_only
+	2	format_source
+	1	get_annotations
+	2	get_report
+	1	reformat_for_annovar
+	2	remove_annovar_outputs
+	1	store_unique_vcf_lines
+	11
+Select jobs to execute...
+
+[Mon Jan 25 18:54:21 2021]
+rule remove_annovar_outputs:
+    input: /home/ubuntu/projects/nanoporeReport/workflow/results/annotated_vcfs/buckeye_sample_2.annotated.hg38_multianno.vcf
+    output: /home/ubuntu/projects/nanoporeReport/workflow/results/annotated_vcfs/buckeye_sample_2.annotated.vcf
+    jobid: 10
+    wildcards: sample=buckeye_sample_2
+
+python scripts/prepare_source/rename_annovar.py /home/ubuntu/projects/nanoporeReport/workflow/results/annotated_vcfs/buckeye_sample_2.annotated.hg38_multianno.vcf
+
+[Mon Jan 25 18:54:21 2021]
+rule store_unique_vcf_lines:
+    input: /home/ubuntu/projects/nanoporeReport/workflow/input/buckeye_sample_7.vcf
+    output: /home/ubuntu/projects/nanoporeReport/workflow/input/buckeye_sample_7.stored
+    jobid: 7
+    wildcards: sample=buckeye_sample_7
+
+python scripts/prepare_source/store_unique_vcf_lines.py /home/ubuntu/projects/nanoporeReport/workflow/input/buckeye_sample_7.vcf /home/ubuntu/projects/nanoporeReport/workflow/input/buckeye_sample_7.stored
+[Mon Jan 25 18:54:21 2021]
+Finished job 10.
+1 of 11 steps (9%) done
+Select jobs to execute...
+
+[Mon Jan 25 18:54:21 2021]
+rule format_source:
+    input: /home/ubuntu/projects/nanoporeReport/workflow/results/annotated_vcfs/buckeye_sample_2.annotated.vcf, /home/ubuntu/projects/nanoporeReport/workflow/input/buckeye_sample_2.bed
+    output: /home/ubuntu/projects/nanoporeReport/workflow/results/final_source/buckeye_sample_2.csv
+    jobid: 9
+    wildcards: sample=buckeye_sample_2
+
+python /home/ubuntu/projects/nanoporeReport/workflow/scripts/prepare_source/format_source.py /home/ubuntu/projects/nanoporeReport/workflow/results/annotated_vcfs/buckeye_sample_2.annotated.vcf /home/ubuntu/projects/nanoporeReport/workflow/input/buckeye_sample_2.bed /home/ubuntu/projects/nanoporeReport/workflow/results/final_source/buckeye_sample_2.csv
+[Mon Jan 25 18:54:21 2021]
+Finished job 7.
+2 of 11 steps (18%) done
+Select jobs to execute...
+
+[Mon Jan 25 18:54:21 2021]
+rule filter_pass_only:
+    input: /home/ubuntu/projects/nanoporeReport/workflow/input/buckeye_sample_7.stored, /home/ubuntu/projects/nanoporeReport/workflow/input/buckeye_sample_7.vcf
+    output: /home/ubuntu/projects/nanoporeReport/workflow/results/filtered_vcfs/buckeye_sample_7.recode.vcf
+    jobid: 6
+    wildcards: sample=buckeye_sample_7
+
+vcftools --vcf /home/ubuntu/projects/nanoporeReport/workflow/input/buckeye_sample_7.vcf --remove-filtered-all --recode --out /home/ubuntu/projects/nanoporeReport/workflow/results/filtered_vcfs/buckeye_sample_7 2> /dev/null
+Removing temporary output file /home/ubuntu/projects/nanoporeReport/workflow/input/buckeye_sample_7.stored.
+[Mon Jan 25 18:54:21 2021]
+Finished job 6.
+3 of 11 steps (27%) done
+Select jobs to execute...
+
+[Mon Jan 25 18:54:21 2021]
+rule reformat_for_annovar:
+    input: /home/ubuntu/projects/nanoporeReport/workflow/results/filtered_vcfs/buckeye_sample_7.recode.vcf
+    output: /home/ubuntu/projects/nanoporeReport/workflow/results/filtered_vcfs/buckeye_sample_7.reformatted.vcf
+    jobid: 5
+    wildcards: sample=buckeye_sample_7
+
+python scripts/prepare_source/reformat_for_annovar.py /home/ubuntu/projects/nanoporeReport/workflow/results/filtered_vcfs/buckeye_sample_7.recode.vcf
+[Mon Jan 25 18:54:21 2021]
+Finished job 9.
+4 of 11 steps (36%) done
+Select jobs to execute...
+[Mon Jan 25 18:54:21 2021]
+Finished job 5.
+5 of 11 steps (45%) done
+
+[Mon Jan 25 18:54:21 2021]
+rule get_report:
+    input: /home/ubuntu/projects/nanoporeReport/workflow/results/final_source/buckeye_sample_2.csv
+    output: /home/ubuntu/projects/nanoporeReport/workflow/results/final_source/buckeye_sample_2.pdf
+    jobid: 8
+    wildcards: sample=buckeye_sample_2
+
+python scripts/jasper_api/request.py /home/ubuntu/projects/nanoporeReport/workflow/results/final_source/buckeye_sample_2.pdf
+Select jobs to execute...
+
+[Mon Jan 25 18:54:21 2021]
+rule get_annotations:
+    input: /home/ubuntu/projects/nanoporeReport/workflow/results/filtered_vcfs/buckeye_sample_7.reformatted.vcf
+    output: /home/ubuntu/projects/nanoporeReport/workflow/results/annotated_vcfs/buckeye_sample_7.annotated.hg38_multianno.vcf
+    jobid: 4
+    wildcards: sample=buckeye_sample_7
+
+perl /home/ubuntu/projects/nanoporeReport/workflow/annovar/table_annovar.pl -vcfinput /home/ubuntu/projects/nanoporeReport/workflow/results/filtered_vcfs/buckeye_sample_7.reformatted.vcf /home/ubuntu/projects/nanoporeReport/workflow/annovar/humandb/ -buildver hg38 --out /home/ubuntu/projects/nanoporeReport/workflow/results/annotated_vcfs/buckeye_sample_7.annotated -remove -protocol refGene -operation g -nastring . > /dev/null 2>&1
+[Mon Jan 25 18:54:28 2021]
+Finished job 4.
+6 of 11 steps (55%) done
+Select jobs to execute...
+
+[Mon Jan 25 18:54:28 2021]
+rule remove_annovar_outputs:
+    input: /home/ubuntu/projects/nanoporeReport/workflow/results/annotated_vcfs/buckeye_sample_7.annotated.hg38_multianno.vcf
+    output: /home/ubuntu/projects/nanoporeReport/workflow/results/annotated_vcfs/buckeye_sample_7.annotated.vcf
+    jobid: 3
+    wildcards: sample=buckeye_sample_7
+
+python scripts/prepare_source/rename_annovar.py /home/ubuntu/projects/nanoporeReport/workflow/results/annotated_vcfs/buckeye_sample_7.annotated.hg38_multianno.vcf
+[Mon Jan 25 18:54:28 2021]
+Finished job 3.
+7 of 11 steps (64%) done
+Select jobs to execute...
+
+[Mon Jan 25 18:54:28 2021]
+rule format_source:
+    input: /home/ubuntu/projects/nanoporeReport/workflow/results/annotated_vcfs/buckeye_sample_7.annotated.vcf, /home/ubuntu/projects/nanoporeReport/workflow/input/buckeye_sample_7.bed
+    output: /home/ubuntu/projects/nanoporeReport/workflow/results/final_source/buckeye_sample_7.csv
+    jobid: 2
+    wildcards: sample=buckeye_sample_7
+
+python /home/ubuntu/projects/nanoporeReport/workflow/scripts/prepare_source/format_source.py /home/ubuntu/projects/nanoporeReport/workflow/results/annotated_vcfs/buckeye_sample_7.annotated.vcf /home/ubuntu/projects/nanoporeReport/workflow/input/buckeye_sample_7.bed /home/ubuntu/projects/nanoporeReport/workflow/results/final_source/buckeye_sample_7.csv
+[Mon Jan 25 18:54:29 2021]
+Finished job 2.
+8 of 11 steps (73%) done
+Select jobs to execute...
+
+[Mon Jan 25 18:54:29 2021]
+rule get_report:
+    input: /home/ubuntu/projects/nanoporeReport/workflow/results/final_source/buckeye_sample_7.csv
+    output: /home/ubuntu/projects/nanoporeReport/workflow/results/final_source/buckeye_sample_7.pdf
+    jobid: 1
+    wildcards: sample=buckeye_sample_7
+
+python scripts/jasper_api/request.py /home/ubuntu/projects/nanoporeReport/workflow/results/final_source/buckeye_sample_7.pdf
+[Mon Jan 25 18:54:29 2021]
+Finished job 8.
+9 of 11 steps (82%) done
+[Mon Jan 25 18:54:29 2021]
+Finished job 1.
+10 of 11 steps (91%) done
+Select jobs to execute...
+
+[Mon Jan 25 18:54:29 2021]
+localrule all:
+    input: /home/ubuntu/projects/nanoporeReport/workflow/results/final_source/buckeye_sample_7.pdf, /home/ubuntu/projects/nanoporeReport/workflow/results/final_source/buckeye_sample_2.pdf
+    jobid: 0
+
+[Mon Jan 25 18:54:29 2021]
+Finished job 0.
+11 of 11 steps (100%) done
+Complete log: /home/ubuntu/projects/nanoporeReport/workflow/.snakemake/log/2021-01-25T185420.980044.snakemake.log

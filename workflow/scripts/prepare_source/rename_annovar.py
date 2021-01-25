@@ -1,9 +1,15 @@
 import sys
 import os
-sys.path.append(os.path.join(os.getcwd(), '..', '..', 'snakemake'))
-sys.path.append(os.path.join(os.getcwd(), '..', 'snakemake'))
-sys.path.append(os.path.join(os.getcwd(), 'snakemake'))
-from genomics import get_config
+import yaml
+
+# Import config files
+config_file_paths = [os.path.join(os.path.realpath('..'), 'config', 'config.yml')]
+config = {}
+for cf in config_file_paths:
+    f = open(cf,'r')
+    conf = yaml.load(f, Loader=yaml.FullLoader)
+    config.update(conf)
+    f.close()
 
 
 def main(filepath):
@@ -14,8 +20,8 @@ def main(filepath):
         sample = sample[:sample.find('.annotated')]
 
     anno_input = os.path.join(input_dir, sample + ".annotated.vcf.avinput")
-    #anno_vcf = os.path.join(input_dir, sample + ".annotated.vcf." + get_config.main("nanoporeReport", "build") + "_multianno.vcf")
-    anno_txt = os.path.join(input_dir, sample + ".annotated.vcf." + get_config.main("nanoporeReport", "build") + "_multianno.txt")
+    #anno_vcf = os.path.join(input_dir, sample + ".annotated.vcf." + config["build"] + "_multianno.vcf")
+    anno_txt = os.path.join(input_dir, sample + ".annotated.vcf." + config["build"] + "_multianno.txt")
     anno_output_vcf = os.path.join(input_dir, sample + ".annotated.vcf")
 
     if filepath != anno_output_vcf:
