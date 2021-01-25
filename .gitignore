@@ -47,19 +47,18 @@ yarn-error.log*
 /workflow/annovar/example
 
 # Snakemake
-/workflow/snakemake/.snakemake
-/workflow/snakemake/dag.svg
-/workflow/snakemake/genomics/__pycache__/*
+workflow/.snakemake/*
+workflow/.snakemake/metadata/*
+/workflow/scripts/dag.svg
+/workflow/scripts/genomics/__pycache__/*
 
 # API logs
 /api/logs
-<<<<<<< HEAD
 /api/__pycache__
-=======
 /api/venv/*
->>>>>>> 19bcf862de4ddd1af8d7d65f3f744fbf137dfe04
 /workflow/snakemake/dag.svg
 
 # Don't know what these are
+dump.rdb
 .eslintcache
 ../node_modules
